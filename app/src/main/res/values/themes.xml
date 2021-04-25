@@ -6,13 +6,15 @@
         <item name="colorPrimaryVariant">@color/blueish</item>
         <item name="colorOnPrimary">@color/white</item>
 
+        <item name="colorSecondary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">@color/black</item>
         <!-- Customize your theme here. -->
 
+</style>
 
-
-    </style>
 
 
     <style name="Theme.SmartFridge.NoActionBar">

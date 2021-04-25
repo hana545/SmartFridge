@@ -1,13 +1,13 @@
 <resources>
     <string name="app_name">SmartFridge</string>
-    <string name="login_username">Username</string>
+    <string name="login_email">Email</string>
     <string name="login_password">Password</string>
     <string name="btn_login">Login</string>
     <string name="btn_register">Register</string>
     <string name="txt_dont_have_acc">You don´t have account? </string>
     <string name="txt_already_have_acc">You already have account? </string>
-    <string name="txt_welcome_register">Welcome to SmartFridge</string>
-    <string name="txt_welcome_login">Welcome back to SmartFridge</string>
+    <string name="txt_welcome_register">SmartFridge</string>
+    <string name="txt_welcome_login">SmartFridge</string>
     <string name="register_email">Email</string>
     <string name="register_username">Username</string>
     <string name="register_password">Password</string>
