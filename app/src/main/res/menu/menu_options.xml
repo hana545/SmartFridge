@@ -9,6 +9,12 @@
         app:showAsAction="never"
 
         />
+    <item
+        android:title="Add new fridge"
+        android:id="@+id/options_newfridge"
+        app:showAsAction="never"
+
+        />
 
     <item
         android:title="Settings"

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="tirkiz">#00c4c4</color>
-    <color name="blueish">#009dc4</color>
+    <color name="tirkiz">#62cabc</color>
+    <color name="blueish">#00c4c4</color>
+    <color name="blue">#009dc4</color>
     <color name="logo_background">#62cabc</color>
     <color name="black">#DD000000</color>
     <color name="white">#FFFFFFFF</color>

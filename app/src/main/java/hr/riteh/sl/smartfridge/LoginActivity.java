@@ -9,6 +9,7 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -25,11 +26,11 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText Email;
-    private EditText Pass;
-    private TextView Register;
-    private Button Login;
-    private ProgressBar ProgBar;
+    private EditText email_edittext;
+    private EditText password_edittext;
+    private TextView btnRegister;
+    private Button btnLogin;
+    private ProgressBar progresBar;
     private FirebaseAuth mAuth;
 
 
@@ -38,32 +39,28 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        Email = (EditText)findViewById(R.id.login_email);
-        Pass = (EditText)findViewById(R.id.login_password);
-        Login = (Button)findViewById(R.id.btn_login);
-        ProgBar = (ProgressBar)findViewById(R.id.login_progress_bar);
-        Register = (TextView)findViewById(R.id.btn_register);
+        email_edittext = (EditText)findViewById(R.id.login_email);
+        password_edittext = (EditText)findViewById(R.id.login_password);
+        btnLogin = (Button)findViewById(R.id.btn_login);
+        progresBar = (ProgressBar)findViewById(R.id.login_progress_bar);
+        btnRegister = (TextView)findViewById(R.id.btn_register);
 
 
         mAuth = FirebaseAuth.getInstance();
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-            startActivity(intent);
-        }
 
-        Login.setOnClickListener(new View.OnClickListener() {
+        btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                closeKeyboard();
                 loginUser();
 
             }
         });
-        Register.setOnClickListener(new View.OnClickListener() {
+        btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //validate(Email.getText().toString(), Pass.getText().toString());
+                closeKeyboard();
                 Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
                 startActivity(intent);
             }
@@ -73,27 +70,27 @@ public class LoginActivity extends AppCompatActivity {
 
 
     private void loginUser(){
-        String email = Email.getText().toString();
-        String password = Pass.getText().toString();
+        String email = email_edittext.getText().toString();
+        String password = password_edittext.getText().toString();
 
         if (email.isEmpty()){
 
-            Email.requestFocus();
-            Email.setError("Email can not be empty");
+            email_edittext.requestFocus();
+            email_edittext.setError("Email can not be empty");
             return;
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
-            Email.requestFocus();
-            Email.setError("Enter valid email address");
+            email_edittext.requestFocus();
+            email_edittext.setError("Enter valid email address");
             return;
         }
 
         if(password.isEmpty()){
-            Pass.requestFocus();
-            Pass.setError("Password can not be empty");
+            password_edittext.requestFocus();
+            password_edittext.setError("Password can not be empty");
             return;
         }
-        ProgBar.setVisibility(View.VISIBLE);
+        progresBar.setVisibility(View.VISIBLE);
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -101,14 +98,18 @@ public class LoginActivity extends AppCompatActivity {
                     Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                     startActivity(intent);
                 } else {
-                    ProgBar.setVisibility(View.INVISIBLE);
+                    progresBar.setVisibility(View.INVISIBLE);
                     Toast.makeText(LoginActivity.this, "Failed to login! Check you credentials", Toast.LENGTH_LONG).show();
                 }
             }
         });
 
-
-
-
+    }
+    private void closeKeyboard() {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(HomeActivity.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }

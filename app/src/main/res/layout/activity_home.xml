@@ -6,46 +6,59 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".HomeActivity"
+    android:background="@drawable/gradient_white_blue"
    >
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-
-    <TextView
-        android:id="@+id/home_welcome"
-        android:layout_width="wrap_content"
+    <Spinner
+        android:id="@+id/fridge_spinner"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="122dp"
-        android:text="Welcome"
-        android:textSize="40sp"
-        android:textStyle="bold" />
+        android:layout_marginTop="0dp"
+        android:padding="15dp"
+        android:spinnerMode="dropdown"
+        style="@style/Widget.AppCompat.DropDownItem.Spinner"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+    />
 
-    <TextView
-        android:id="@+id/home_username"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/home_welcome"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="18dp"
-        android:text=""
-        android:textSize="40sp"
-        android:textStyle="bold" />
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignBottom="@+id/fridge_spinner"
+        android:layout_marginBottom="39dp"
+        android:background="@color/tirkiz"
+        app:layout_constraintTop_toBottomOf="@+id/fridge_spinner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="242dp"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/home_btn_newMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="80dp"
+            android:clickable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.9"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@android:drawable/ic_input_add" />
 
-        android:text="this is your home page"
-        android:textAlignment="center"
-        android:gravity="center"
-        android:textSize="30sp"
-        android:textStyle="bold" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+     <LinearLayout
+         android:id="@+id/home_card_layout"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:orientation="horizontal">
 
-
+     </LinearLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
@@ -55,6 +68,7 @@
         app:itemBackground="?android:attr/windowBackground"
         app:menu="@menu/menu_navigation"
         />
+
 
 
 </RelativeLayout>

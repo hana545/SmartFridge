@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -25,20 +26,24 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
+import hr.riteh.sl.smartfridge.FirebaseDatabase.Fridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.User;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private EditText Name;
-    private EditText Email;
-    private EditText Pass;
-    private Button Register;
-    private ProgressBar ProgBar;
-    private TextView Login;
+    private EditText name_edittext;
+    private EditText email_edittext;
+    private EditText password_edittext;
+    private Button btnRegister;
+    private ProgressBar progresBar;
+    private TextView btnLogin;
     private FirebaseAuth mAuth;
     private FirebaseDatabase db;
+    private ArrayList<String> fridgenames = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,27 +54,35 @@ public class RegisterActivity extends AppCompatActivity {
         DatabaseReference db = database.getReference().child("users");
         User user = new User();
 
-        Name = (EditText)findViewById(R.id.register_username);
-        Email = (EditText)findViewById(R.id.register_email);
-        Pass = (EditText)findViewById(R.id.register_password);
-        Login = (TextView)findViewById(R.id.btn_login);
-        Register = (Button)findViewById(R.id.btn_register);
-        ProgBar = (ProgressBar)findViewById(R.id.register_progress_bar);
+        name_edittext = (EditText)findViewById(R.id.register_username);
+        email_edittext = (EditText)findViewById(R.id.register_email);
+        password_edittext = (EditText)findViewById(R.id.register_password);
+        btnLogin = (TextView)findViewById(R.id.btn_login);
+        btnRegister = (Button)findViewById(R.id.btn_register);
+        progresBar = (ProgressBar)findViewById(R.id.register_progress_bar);
+
+        fridgenames.add("Optimistic horse");
+        fridgenames.add("Gentle owl");
+        fridgenames.add("Charming giraffe");
+        fridgenames.add("Ruthless mouse");
+        fridgenames.add("Incredible rabbit");
 
         mAuth = FirebaseAuth.getInstance();
 
 
-        Login.setOnClickListener(new View.OnClickListener() {
+        btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                closeKeyboard();
                 Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                 startActivity(intent);
             }
         });
 
-        Register.setOnClickListener(new View.OnClickListener() {
+        btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                closeKeyboard();
                 registerUser();
 
             }
@@ -77,41 +90,43 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void registerUser(){
-        String email = Email.getText().toString();
-        String name = Name.getText().toString();
-        String password = Pass.getText().toString();
+        String email = email_edittext.getText().toString();
+        String name = name_edittext.getText().toString();
+        String password = password_edittext.getText().toString();
         Boolean validate = true;
         if (email.isEmpty()){
 
-            Email.requestFocus();
-            Email.setError("Email can not be empty");
+            email_edittext.requestFocus();
+            email_edittext.setError("Email can not be empty");
             return;
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
-            Email.requestFocus();
-            Email.setError("Enter valid email address");
+            email_edittext.requestFocus();
+            email_edittext.setError("Enter valid email address");
             return;
         }
         if(name.isEmpty()) {
-            Name.requestFocus();
-            Name.setError("Username can not be empty");
+            name_edittext.requestFocus();
+            name_edittext.setError("Username can not be empty");
             return;
         }
         if(password.isEmpty()){
-            Pass.requestFocus();
-            Pass.setError("Password can not be empty");
+            password_edittext.requestFocus();
+            password_edittext.setError("Password can not be empty");
             return;
         }
         if(password.length() < 6){
-            Pass.requestFocus();
-            Pass.setError("Password must have at least 6 characters");
+            password_edittext.requestFocus();
+            password_edittext.setError("Password must have at least 6 characters");
             return;
         }
-        ProgBar.setVisibility(View.VISIBLE);
+        progresBar.setVisibility(View.VISIBLE);
+        //register user with auth
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        //add user to database
                         if (task.isSuccessful()) {
                             User user = new User(name, email);
                             FirebaseDatabase.getInstance().getReference("users").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
@@ -120,11 +135,29 @@ public class RegisterActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         Toast.makeText(RegisterActivity.this, "User has been registered successfully!", Toast.LENGTH_LONG).show();
+                                    } else {
+                                        progresBar.setVisibility(View.INVISIBLE);
+                                        Toast.makeText(RegisterActivity.this, "Failed to register!.", Toast.LENGTH_LONG).show();
+
+                                    }
+                                }
+                            });
+                            //create his first fridge
+                            Random rand = new Random();
+                            int random_index = rand.nextInt(fridgenames.size());
+                            String Fname = fridgenames.get(random_index);
+                            String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                            Fridge fridge = new Fridge(Fname, ownerID, true);
+                            FirebaseDatabase.getInstance().getReference().child("fridges").push().setValue(fridge).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(RegisterActivity.this, "Fridge created!", Toast.LENGTH_LONG).show();
                                         Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
                                         startActivity(intent);
                                     } else {
-                                        ProgBar.setVisibility(View.INVISIBLE);
-                                        Toast.makeText(RegisterActivity.this, "Failed to register! Try again.", Toast.LENGTH_LONG).show();
+                                        progresBar.setVisibility(View.INVISIBLE);
+                                        Toast.makeText(RegisterActivity.this, "Failed to create fridge! Try again.", Toast.LENGTH_LONG).show();
 
                                     }
                                 }
@@ -132,12 +165,20 @@ public class RegisterActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("TAG", "createUserWithEmail:failure", task.getException());
-                            ProgBar.setVisibility(View.INVISIBLE);
+                            progresBar.setVisibility(View.INVISIBLE);
                             Toast.makeText(RegisterActivity.this, "Failed to register! Try again.", Toast.LENGTH_LONG).show();
 
                         }
                     }
                 });
 
+    }
+
+    private void closeKeyboard() {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(HomeActivity.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }

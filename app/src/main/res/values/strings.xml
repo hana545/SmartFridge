@@ -12,4 +12,7 @@
     <string name="register_username">Username</string>
     <string name="register_password">Password</string>
     <string name="login_success">You have succesfully loged in</string>
+    <string name="dialog_fridgename">Fridge name</string>
+    <string name="dialog_create">Create</string>
+    <string name="dialog_cancel">Cancel</string>
 </resources>
