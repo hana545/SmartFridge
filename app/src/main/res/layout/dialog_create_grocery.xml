@@ -12,15 +12,13 @@
         android:scaleType="center"
         android:src="@drawable/gradient_blue_white" />
 
-    <Spinner
-        android:id="@+id/dialog_grocery_fridge_spinner"
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="105dp"
-        android:padding="15dp"
-        android:spinnerMode="dropdown"
-        style="@style/Widget.AppCompat.DropDownItem.Spinner"
-        />
+        android:layout_marginTop="80dp"
+        android:id="@+id/fridge_txt">
+    </TextView>
 
     <EditText
         android:id="@+id/dialog_grocery_grocery_name"
@@ -29,12 +27,13 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
+        android:layout_marginTop="10dp"
         android:hint="Grocery name"
-        android:layout_below="@id/dialog_grocery_fridge_spinner"
         android:ems="10"
         android:gravity="start|top"
         android:inputType="textMultiLine"
-        android:textColor="@color/black"/>
+        android:textColor="@color/black"
+        android:layout_below="@id/fridge_txt"/>
 
     <EditText
         android:id="@+id/dialog_grocery_quantity"

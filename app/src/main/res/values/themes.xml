@@ -6,7 +6,7 @@
         <item name="colorPrimaryVariant">@color/blueish</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="android:textColorPrimary">@color/white</item>
-
+        <item name="android:textColorPrimaryDisableOnly">@color/black</item>
         <item name="colorSecondary">@color/white</item>
         <item name="android:textColorSecondary">@color/white</item>
 

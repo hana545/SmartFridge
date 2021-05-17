@@ -3,6 +3,8 @@ package hr.riteh.sl.smartfridge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -17,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -36,7 +39,6 @@ import java.util.List;
 
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Fridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Grocery;
-import hr.riteh.sl.smartfridge.FirebaseDatabase.Message;
 
 public class GroceryActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
 
@@ -44,8 +46,12 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
     private DatabaseReference db;
     private Query fridges_query;
     private Query mess_query;
+    private Query groceries_query;
 
     private List<String> fridge_list = new ArrayList<String>();
+    private List<String> grocery_list_name = new ArrayList<String>();
+    private List<String> grocery_list_quantity = new ArrayList<String>();
+    private List<String> grocery_list_exp_date = new ArrayList<String>();
     private List<String> fridge_id_list = new ArrayList<String>();
     int selected_fridge = 0;
     long countFridge = 0;
@@ -53,6 +59,8 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
     LinearLayout home_layout;
 
     ArrayAdapter adapter;
+    RecyclerView recyclerView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +97,47 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
         });
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM); //bellow setSupportActionBar(toolbar);
         getSupportActionBar().setCustomView(R.layout.titlebar);
+
+        Spinner spinner = (Spinner) findViewById(R.id.grocery_fridge_spinner);
+        spinner.setOnItemSelectedListener(this);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, fridge_list);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner.setAdapter(adapter);
+
+        getAllFridges();
+
+        recyclerView = findViewById(R.id.recycler_view);
+       /* groceries_query = FirebaseDatabase.getInstance().getReference().child("grocery").orderByChild("fridgeID").equalTo(fridge_id_list.get(selected_fridge));
+        groceries_query.addListenerForSingleValueEvent(new ValueEventListener() {
+                 @Override
+                 public void onDataChange(@NonNull DataSnapshot snapshot) {
+                     if (snapshot.exists()) {
+                         grocery_list_exp_date.clear();
+                         grocery_list_name.clear();
+                         grocery_list_quantity.clear();
+                         // dataSnapshot is the "grocery" node with all children with id userID
+                         for (DataSnapshot groceries : snapshot.getChildren()) {
+                             Grocery groceryData = groceries.getValue(Grocery.class);
+                             grocery_list_name.add(groceryData.grocery_name);
+                             grocery_list_quantity.add(groceryData.quantity);
+                             grocery_list_exp_date.add(groceryData.exp_date);
+                         }
+                     } else {
+                         Toast.makeText(GroceryActivity.this, "You dont have any groceries", Toast.LENGTH_LONG).show();
+                     }
+                 }
+                 @Override
+                 public void onCancelled(@NonNull DatabaseError error) {
+                     Toast.makeText(GroceryActivity.this, "Something wrong happened with groceries", Toast.LENGTH_LONG).show();
+                 }
+             });
+
+        GroceryAdaper groceryAdaper = new GroceryAdaper(this, grocery_list_name, grocery_list_quantity, grocery_list_exp_date);
+        recyclerView.setAdapter(groceryAdaper);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));*/
 
 
         FloatingActionButton fab = findViewById(R.id.grocery_btn_newGrocery);
@@ -134,6 +183,7 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
                     }
                     adapter.notifyDataSetChanged();
                     countFridge = snapshot.getChildrenCount();
+                    /*selected_fridge = (int)fridge_id_list.get(0);*/
                 } else {
                     Toast.makeText(GroceryActivity.this, "You dont have any fridges", Toast.LENGTH_LONG).show();
                 }
@@ -177,18 +227,8 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
 
         final View customLayout = getLayoutInflater().inflate(R.layout.dialog_create_grocery, null);
         builder.setView(customLayout);
-
-        /*Spinner spinner = (Spinner) findViewById(R.id.dialog_grocery_fridge_spinner);
-        spinner.setOnItemSelectedListener(this);
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, fridge_list);
-        // Specify the layout to use when the list of choices appears
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        spinner.setAdapter(adapter);*/
-
-        /*getAllFridges();*/
-
+        TextView fridge_name = customLayout.findViewById(R.id.fridge_txt);
+        fridge_name.setText("Fridge: " + fridge_list.get(selected_fridge));
         EditText edt_grocery_name = (EditText) customLayout.findViewById(R.id.dialog_grocery_grocery_name);
         EditText edt_quantity = (EditText) customLayout.findViewById(R.id.dialog_grocery_quantity);
         EditText edt_exp_date = (EditText) customLayout.findViewById(R.id.dialog_grocery_exp_date);
