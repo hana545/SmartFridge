@@ -15,12 +15,14 @@ public class GroceryAdaper extends RecyclerView.Adapter<GroceryAdaper.GroceryVie
 
     List<String> name, quantity, exp_date;
     Context context;
+    private OnGroceryListener mOnGroceryListener;
 
-    public GroceryAdaper(Context ct, List<String> gr_name, List<String> gr_quantity, List<String> gr_exp_date){
+    public GroceryAdaper(Context ct, List<String> gr_name, List<String> gr_quantity, List<String> gr_exp_date, OnGroceryListener onGroceryListener){
         context = ct;
         name = gr_name;
         quantity = gr_quantity;
         exp_date = gr_exp_date;
+        this.mOnGroceryListener = onGroceryListener;
     }
 
     @NonNull
@@ -28,7 +30,7 @@ public class GroceryAdaper extends RecyclerView.Adapter<GroceryAdaper.GroceryVie
     public GroceryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.grocery_row, parent, false);
-        return new GroceryViewHolder(view);
+        return new GroceryViewHolder(view, mOnGroceryListener);
     }
 
     @Override
@@ -43,16 +45,26 @@ public class GroceryAdaper extends RecyclerView.Adapter<GroceryAdaper.GroceryVie
         return name.size();
     }
 
-    public class GroceryViewHolder extends RecyclerView.ViewHolder{
+    public class GroceryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         TextView row_name, row_quantity, row_exp_date;
-
-        public GroceryViewHolder(@NonNull View itemView) {
+        OnGroceryListener onGroceryListener;
+        public GroceryViewHolder(@NonNull View itemView, OnGroceryListener onGroceryListener) {
             super(itemView);
             row_name = itemView.findViewById(R.id.recycler_grocery_name);
             row_quantity = itemView.findViewById(R.id.recycler_grocery_quantity);
             row_exp_date = itemView.findViewById(R.id.recycler_grocery_exp_date);
-
+            this.onGroceryListener = onGroceryListener;
+            itemView.setOnClickListener(this);
         }
+
+        @Override
+        public void onClick(View v) {
+            onGroceryListener.onGroceryClick(getAdapterPosition());
+        }
+    }
+
+    public interface OnGroceryListener{
+        void onGroceryClick(int position);
     }
 }

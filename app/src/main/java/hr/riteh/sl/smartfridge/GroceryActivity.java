@@ -42,7 +42,8 @@ import java.util.SimpleTimeZone;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Fridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Grocery;
 
-public class GroceryActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
+
+public class GroceryActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, GroceryAdaper.OnGroceryListener {
 
     String userID;
     private DatabaseReference db = FirebaseDatabase.getInstance().getReference();
@@ -54,6 +55,7 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
     private List<String> grocery_list_name = new ArrayList<String>();
     private List<String> grocery_list_quantity = new ArrayList<String>();
     private List<String> grocery_list_exp_date = new ArrayList<String>();
+    private List<String> grocery_id_list = new ArrayList<String>();
     private List<String> fridge_id_list = new ArrayList<String>();
     int selected_fridge = 0;
     long countFridge = 0;
@@ -112,7 +114,7 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
 
         getAllFridges();
         recyclerView = findViewById(R.id.recycler_view);
-        groceryAdaper = new GroceryAdaper(this, grocery_list_name, grocery_list_quantity, grocery_list_exp_date);
+        groceryAdaper = new GroceryAdaper(this, grocery_list_name, grocery_list_quantity, grocery_list_exp_date, this);
         recyclerView.setAdapter(groceryAdaper);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -139,12 +141,14 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
                     grocery_list_exp_date.clear();
                     grocery_list_name.clear();
                     grocery_list_quantity.clear();
+                    grocery_id_list.clear();
                     // dataSnapshot is the "grocery" node with all children with id userID
                     for (DataSnapshot groceries : snapshot.getChildren()) {
                         Grocery groceryData = groceries.getValue(Grocery.class);
                         grocery_list_name.add(groceryData.grocery_name);
                         grocery_list_quantity.add(groceryData.quantity);
                         grocery_list_exp_date.add(groceryData.exp_date);
+                        grocery_id_list.add(groceries.getKey());
                     }
                     Collections.reverse(grocery_list_name);
                     Collections.reverse(grocery_list_quantity);
@@ -161,7 +165,6 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
             }
         });
 
-        System.out.println(id);
     }
 
     public void onNothingSelected(AdapterView<?> arg0) {
@@ -169,7 +172,6 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
     }
 
     private void getAllFridges() {
-        System.out.println("fridges");
         userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
         fridges_query = db.child("fridges").orderByChild("ownerID").equalTo(userID);
 
@@ -200,8 +202,6 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
                 Toast.makeText(GroceryActivity.this, "Something wrong happened with fridge", Toast.LENGTH_LONG).show();
             }
         });
-        System.out.println(fridge_id_list );
-        System.out.println(fridge_list);
     }
 
     @Override
@@ -285,4 +285,11 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
 
     }
 
+    @Override
+    public void onGroceryClick(int position) {
+        Intent intent = new Intent(this, GroceryItemActivity.class);
+        String grocery_id = grocery_id_list.get(position);
+        intent.putExtra("selected_grocery", grocery_id);
+        startActivity(intent);
+    }
 }
