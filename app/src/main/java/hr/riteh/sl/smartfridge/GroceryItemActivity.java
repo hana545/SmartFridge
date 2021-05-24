@@ -72,7 +72,7 @@ public class GroceryItemActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         String grocery_id = extras.getString("selected_grocery");
-        System.out.println(grocery_id);
+        //System.out.println(grocery_id);
         /*grocery_query = db.child("grocery").orderByChild("groceryID").equalTo(grocery_id);
         grocery_query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -101,7 +101,7 @@ public class GroceryItemActivity extends AppCompatActivity {
         });
 */
 
-        System.out.println(grocery_name);
+       // System.out.println(grocery_name);
 
 
     }

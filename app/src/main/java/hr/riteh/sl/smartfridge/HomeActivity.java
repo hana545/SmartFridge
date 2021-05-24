@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -44,29 +46,41 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Fridge;
+import hr.riteh.sl.smartfridge.FirebaseDatabase.Grocery;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Message;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.User;
 
-public class HomeActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class HomeActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, MessageAdapter.OnMessageListener {
 
     String userID;
     private DatabaseReference db;
     private Query fridges_query;
     private Query mess_query;
+    private Query author_query;
+    private Query user_query;
 
     private List<String> fridge_list = new ArrayList<String>();
     private List<String> fridge_id_list = new ArrayList<String>();
     int selected_fridge = 0;
     long countFridge = 0;
 
+    private List<String> messages_list_text = new ArrayList<String>();
+    private List<String> messages_list_author= new ArrayList<String>();
+    private List<String> messages_list_test= new ArrayList<String>();
+
+    private List<String> messages_id_list = new ArrayList<String>();
+
     LinearLayout home_layout;
 
     ArrayAdapter adapter;
+    MessageAdapter messageAdapter;
+    RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,29 +129,10 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
         getAllFridges();
 
-        ///treba se popunit lista frizidera
-        //String fridgeID = fridge_id_list.get(selected_fridge);
-       // mess_query = FirebaseDatabase.getInstance().getReference().child("messages").orderByChild("fridgeID").equalTo(fridgeID);
-
-        /*mess_query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    for (DataSnapshot mess : snapshot.getChildren()) {
-                        Message messData = mess.getValue(Message.class);
-                        Toast.makeText(HomeActivity.this, "yes", Toast.LENGTH_LONG).show();
-                    }
-
-                } else {
-                    Toast.makeText(HomeActivity.this, "You dont have any messages", Toast.LENGTH_LONG).show();
-
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(HomeActivity.this, "Something wrong happened with fridge", Toast.LENGTH_LONG).show();
-            }
-        });*/
+        recyclerView = findViewById(R.id.recycler_view_messages);
+        messageAdapter = new MessageAdapter(this, messages_list_text, messages_list_author,this);
+        recyclerView.setAdapter(messageAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
         FloatingActionButton fab = findViewById(R.id.home_btn_newMessage);
@@ -226,7 +221,44 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         // On selecting a spinner item
         String fridge_name = parent.getItemAtPosition(pos).toString();
         selected_fridge = (int) id;
+        //String fridgeID = fridge_id_list.get(selected_fridge);
+        //Log.i("MESSFRIDGE", "selFridge: " +selected_fridge);
+        //Log.i("MESSFRIDGE", "selFridge: " +fridge_id_list.get(selected_fridge));
+       getFridgeMessages();
     }
+
+    private void getFridgeMessages() {
+        Log.i("TAGMESS", "getFridgeMessages: pzvano");
+        mess_query = FirebaseDatabase.getInstance().getReference().child("messages").orderByChild("fridgeID").equalTo(fridge_id_list.get(selected_fridge));
+        mess_query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                messages_id_list.clear();
+                messages_list_author.clear();
+                messages_list_text.clear();
+                if (snapshot.exists()) {
+                    for (DataSnapshot mess : snapshot.getChildren()) {
+                        Message messData = mess.getValue(Message.class);
+                        messages_list_text.add(messData.text);
+                        messages_list_author.add(messData.author);
+                        messages_id_list.add(mess.getKey());
+                    }
+                    Collections.reverse(messages_id_list);
+                    Collections.reverse(messages_list_author);
+                    Collections.reverse(messages_list_text);
+                } else{
+                    Toast.makeText(HomeActivity.this, "You dont have any messages", Toast.LENGTH_LONG).show();
+                }
+                messageAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(HomeActivity.this, "Something wrong happened with fridge", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
 
     public void onNothingSelected(AdapterView<?> arg0) {
         // TODO Auto-generated method stub
@@ -354,9 +386,10 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String text = message_text.getText().toString();
-                String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                String author_name = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
                 String fridgeId = fridge_id_list.get(selected_fridge);
-                Message msg = new Message(text, ownerID, fridgeId);
+               // Log.i("INSERTMESS", "fridge: "+ fridgeId);
+                Message msg = new Message(text, author_name, fridgeId);
 
                 if (!text.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null) {
                     //username_textview.setText(msg.text);
@@ -364,6 +397,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
+                                getFridgeMessages();
                                 Toast.makeText(HomeActivity.this, "Message posted!", Toast.LENGTH_LONG).show();
 
                             } else {
@@ -387,6 +421,12 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         // create and show the alert dialog
         AlertDialog dialog = builder.create();
         dialog.show();
+
+    }
+
+
+    @Override
+    public void onMessageClick(int position) {
 
     }
 }
