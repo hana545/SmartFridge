@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -23,6 +25,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Grocery;
 
@@ -33,6 +37,11 @@ public class GroceryItemActivity extends AppCompatActivity {
     private String grocery_name;
     private String grocery_quantity;
     private String grocery_exp_date;
+    private String grocery_id = "";
+
+    EditText editName;
+    EditText editQuantity;
+    EditText edit_exp_date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +57,8 @@ public class GroceryItemActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.grocery:
-
+                        startActivity(new Intent(getApplicationContext(), GroceryActivity.class));
+                        overridePendingTransition(0, 0);
                         return true;
                     case R.id.fridge:
                         startActivity(new Intent(getApplicationContext(), HomeActivity.class));
@@ -71,9 +81,12 @@ public class GroceryItemActivity extends AppCompatActivity {
         getSupportActionBar().setCustomView(R.layout.titlebar);
 
         Bundle extras = getIntent().getExtras();
-        String grocery_id = extras.getString("selected_grocery");
+        grocery_id = extras.getString("selected_grocery");
+        editName = findViewById(R.id.grocery_item_name);
+        editQuantity = findViewById(R.id.grocery_item_quantity);
+        edit_exp_date = findViewById(R.id.grocery_item_exp_date);
         //System.out.println(grocery_id);
-        /*grocery_query = db.child("grocery").orderByChild("groceryID").equalTo(grocery_id);
+        grocery_query = db.child("grocery").child(grocery_id);
         grocery_query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -81,28 +94,97 @@ public class GroceryItemActivity extends AppCompatActivity {
                 grocery_name = groceryData.grocery_name;
                 grocery_quantity = groceryData.quantity;
                 grocery_exp_date = groceryData.exp_date;
+
+                editName.setText(grocery_name);
+                editQuantity.setText(grocery_quantity);
+                edit_exp_date.setText(grocery_exp_date);
+
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(GroceryItemActivity.this, "Something wrong happened with groceries", Toast.LENGTH_LONG).show();
             }
-        });*/
+        });
 
-        /*db.child("grocery").child(groceryID).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+        Button save = findViewById(R.id.grocery_item_save);
+        Button back = findViewById(R.id.grocery_item_back);
+        Button delete = findViewById(R.id.grocery_item_delete);
+
+        save.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if (!task.isSuccessful()) {
-                    Log.e("firebase", "Error getting data", task.getException());
-                }
-                else {
-                    Log.d("firebase", String.valueOf(task.getResult().getValue()));
-                }
+            public void onClick(View view) {
+                editGrocery();
+                Intent intent = new Intent(GroceryItemActivity.this, GroceryActivity.class);
+                intent.putExtra("grocery_updated", true);
+                startActivity(intent);
             }
         });
-*/
 
-       // System.out.println(grocery_name);
+        back.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(GroceryItemActivity.this, GroceryActivity.class);
+                intent.putExtra("grocery_updated", false);
+                startActivity(intent);
+            }
+        });
 
+        delete.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                deleteGrocery();
+                Intent intent = new Intent(GroceryItemActivity.this, GroceryActivity.class);
+                intent.putExtra("grocery_updated", false);
+                startActivity(intent);
+            }
+        });
+
+    }
+
+    public void editGrocery() {
+        editName = findViewById(R.id.grocery_item_name);
+        editQuantity = findViewById(R.id.grocery_item_quantity);
+        edit_exp_date = findViewById(R.id.grocery_item_exp_date);
+        grocery_query = db.child("grocery").child(grocery_id);
+        grocery_query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                Map<String, Object> groceryValues = new HashMap<String,Object>();
+                for (DataSnapshot snap : snapshot.getChildren()) {
+                    groceryValues.put(snap.getKey(), snap.getValue());
+                }
+                    groceryValues.put("grocery_name", editName.getText().toString());
+                    groceryValues.put("quantity", editQuantity.getText().toString());
+                    groceryValues.put("exp_date", edit_exp_date.getText().toString());
+                    db.child("grocery").child(grocery_id).updateChildren(groceryValues);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+
+
+        });
+    }
+
+    public void deleteGrocery(){
+        grocery_query = db.child("grocery").child(grocery_id);
+        grocery_query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for (DataSnapshot grocery: snapshot.getChildren()) {
+                    grocery.getRef().removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+
+
+        });
 
     }
 }

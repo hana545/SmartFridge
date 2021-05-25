@@ -59,6 +59,7 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
     private List<String> fridge_id_list = new ArrayList<String>();
     int selected_fridge = 0;
     long countFridge = 0;
+    private boolean updated_grocery;
 
     LinearLayout home_layout;
 
@@ -102,6 +103,15 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
         });
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM); //bellow setSupportActionBar(toolbar);
         getSupportActionBar().setCustomView(R.layout.titlebar);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            updated_grocery = extras.getBoolean("selected_grocery");
+            if (updated_grocery) {
+                Toast.makeText(GroceryActivity.this, "Grocery updated", Toast.LENGTH_LONG).show();
+            }
+        }
+
 
         Spinner spinner = (Spinner) findViewById(R.id.grocery_fridge_spinner);
         spinner.setOnItemSelectedListener(this);
@@ -153,6 +163,8 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
                     Collections.reverse(grocery_list_name);
                     Collections.reverse(grocery_list_quantity);
                     Collections.reverse(grocery_list_exp_date);
+                    Collections.reverse(grocery_id_list);
+                    System.out.println("tu sam");
                     groceryAdaper.notifyDataSetChanged();
 
                 } else {
