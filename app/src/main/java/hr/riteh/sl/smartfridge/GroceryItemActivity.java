@@ -85,7 +85,6 @@ public class GroceryItemActivity extends AppCompatActivity {
         editName = findViewById(R.id.grocery_item_name);
         editQuantity = findViewById(R.id.grocery_item_quantity);
         edit_exp_date = findViewById(R.id.grocery_item_exp_date);
-        //System.out.println(grocery_id);
         grocery_query = db.child("grocery").child(grocery_id);
         grocery_query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -107,7 +106,6 @@ public class GroceryItemActivity extends AppCompatActivity {
         });
 
         Button save = findViewById(R.id.grocery_item_save);
-        Button back = findViewById(R.id.grocery_item_back);
         Button delete = findViewById(R.id.grocery_item_delete);
 
         save.setOnClickListener(new View.OnClickListener(){
@@ -116,15 +114,6 @@ public class GroceryItemActivity extends AppCompatActivity {
                 editGrocery();
                 Intent intent = new Intent(GroceryItemActivity.this, GroceryActivity.class);
                 intent.putExtra("grocery_updated", true);
-                startActivity(intent);
-            }
-        });
-
-        back.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(GroceryItemActivity.this, GroceryActivity.class);
-                intent.putExtra("grocery_updated", false);
                 startActivity(intent);
             }
         });

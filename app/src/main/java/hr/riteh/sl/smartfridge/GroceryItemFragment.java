@@ -80,7 +80,6 @@ public class GroceryItemFragment extends Fragment {
         FragmentManager ft = getFragmentManager();
 
         Button save = view.findViewById(R.id.grocery_item_save);
-        Button back = view.findViewById(R.id.grocery_item_back);
         Button delete = view.findViewById(R.id.grocery_item_delete);
 
         save.setOnClickListener(new View.OnClickListener(){
@@ -92,13 +91,6 @@ public class GroceryItemFragment extends Fragment {
             }
         });
 
-        back.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                ft.beginTransaction().replace(R.id.fragment_container, mGroceryFragment).addToBackStack(null).commit();
-
-            }
-        });
 
         delete.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -128,13 +120,15 @@ public class GroceryItemFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Grocery groceryData = snapshot.getValue(Grocery.class);
-                grocery_name = groceryData.grocery_name;
-                grocery_quantity = groceryData.quantity;
-                grocery_exp_date = groceryData.exp_date;
+                if(groceryData != null) {
+                    grocery_name = groceryData.grocery_name;
+                    grocery_quantity = groceryData.quantity;
+                    grocery_exp_date = groceryData.exp_date;
 
-                editName.setText(grocery_name);
-                editQuantity.setText(grocery_quantity);
-                edit_exp_date.setText(grocery_exp_date);
+                    editName.setText(grocery_name);
+                    editQuantity.setText(grocery_quantity);
+                    edit_exp_date.setText(grocery_exp_date);
+                }
 
             }
             @Override
