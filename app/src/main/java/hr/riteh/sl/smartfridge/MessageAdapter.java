@@ -9,6 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
@@ -34,7 +36,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-        holder.row_text.setText(text.get(position));
+        String shortMess = StringUtils.substring(text.get(position), 0, 36) + "... ";
+        holder.row_text.setText(shortMess);
         holder.row_author.setText("- "+author.get(position));
     }
 

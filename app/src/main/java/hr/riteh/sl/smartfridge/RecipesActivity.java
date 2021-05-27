@@ -3,6 +3,7 @@ package hr.riteh.sl.smartfridge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +16,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class RecipesActivity extends AppCompatActivity {
+
+    MessagesFragment mMessagesFragment = new MessagesFragment();
+    GroceryFragment mGroceryFragment = new GroceryFragment();
+    FragmentManager ft = getSupportFragmentManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,13 +34,14 @@ public class RecipesActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.grocery:
-                        startActivity(new Intent(getApplicationContext(), GroceryActivity.class));
-                        overridePendingTransition(0,0);
-                        return true;
                     case R.id.fridge:
                         startActivity(new Intent(getApplicationContext(), HomeActivity.class));
                         overridePendingTransition(0,0);
+                        return true;
+                    case R.id.grocery:
+                        startActivity(new Intent(getApplicationContext(), HomeActivity.class));
+                        overridePendingTransition(0,0);
+
                         return true;
                     case R.id.recipes:
                         return true;

@@ -29,12 +29,12 @@ public class StoresActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.grocery:
-                        startActivity(new Intent(getApplicationContext(), GroceryActivity.class));
-                        overridePendingTransition(0,0);
-                        return true;
                     case R.id.fridge:
                         startActivity(new Intent(getApplicationContext(), HomeActivity.class));
+                        overridePendingTransition(0,0);
+                        return true;
+                    case R.id.grocery:
+                        startActivity(new Intent(getApplicationContext(), GroceryActivity.class));
                         overridePendingTransition(0,0);
                         return true;
                     case R.id.recipes:

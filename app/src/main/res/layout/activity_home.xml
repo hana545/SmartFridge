@@ -9,6 +9,7 @@
     android:background="@drawable/gradient_white_blue"
    >
 
+
     <Spinner
         android:id="@+id/fridge_spinner"
         android:layout_width="match_parent"
@@ -18,36 +19,29 @@
         android:spinnerMode="dropdown"
         android:textColor = "#FFFFFF"
         style="@style/Widget.AppCompat.DropDownItem.Spinner"
-    />
+        />
 
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="50dp"
+        android:layout_below="@+id/fridge_spinner"
+        android:layout_marginTop="5dp"
         android:background="@color/tirkiz"
         />
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_messages"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="56dp"
-            android:layout_marginTop="56dp"
-            >
 
-        </androidx.recyclerview.widget.RecyclerView>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/home_btn_newMessage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="80dp"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="40dp"
-            app:srcCompat="@android:drawable/ic_input_add" />
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/bottom_navigation"
+        android:layout_below="@+id/divider"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="0dp">
 
+
+    </FrameLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"

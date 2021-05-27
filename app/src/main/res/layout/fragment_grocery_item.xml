@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".GroceryItemFragment"
+android:background="@drawable/gradient_white_blue">
+
+<RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="30dp"
+    android:layout_marginRight="30dp"
+    android:id="@+id/grocery_item_relative">
+    <EditText
+        android:id="@+id/grocery_item_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginTop="100dp"
+        android:hint="Grocery name"
+        android:ems="10"
+        android:gravity="start|top"
+        android:inputType="textMultiLine"
+        android:textColor="@color/black"
+        />
+
+    <EditText
+        android:id="@+id/grocery_item_quantity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/grocery_item_name"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:hint="Quantity"
+        android:ems="10"
+        android:gravity="start|top"
+        android:inputType="textMultiLine"
+        android:textColor="@color/black"
+        />
+
+    <EditText
+        android:id="@+id/grocery_item_exp_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/grocery_item_quantity"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:hint="Exp. date"
+        android:ems="10"
+        android:gravity="start|top"
+        android:inputType="textMultiLine"
+        android:textColor="@color/black"
+        />
+</RelativeLayout>
+
+<Button
+    android:layout_width="100dp"
+    android:layout_height="40dp"
+    android:text="Save"
+    android:id="@+id/grocery_item_save"
+    android:layout_below="@id/grocery_item_relative"
+    android:layout_marginTop="30dp"
+    android:layout_marginRight="40dp"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentRight="true" />
+<Button
+    android:layout_width="100dp"
+    android:layout_height="40dp"
+    android:text="Delete"
+    android:id="@+id/grocery_item_delete"
+    android:layout_below="@id/grocery_item_relative"
+    android:layout_marginTop="30dp"
+    android:layout_marginRight="20dp"
+    android:layout_toLeftOf="@id/grocery_item_save"
+    android:backgroundTint="#ff8080"/>
+
+<Button
+    android:layout_width="100dp"
+    android:layout_height="40dp"
+    android:text="Back"
+    android:id="@+id/grocery_item_back"
+    android:layout_below="@id/grocery_item_relative"
+    android:layout_marginTop="30dp"
+    android:layout_marginRight="20dp"
+    android:layout_toLeftOf="@id/grocery_item_delete"
+    />
+
+</RelativeLayout>
