@@ -68,8 +68,10 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private List<String> fridge_list = new ArrayList<String>();
     private List<String> fridge_id_list = new ArrayList<String>();
+    private List<String> owner_id_list = new ArrayList<String>();
     private String fridge_name;
     int selected_fridge = 0;
+    private String ownerID;
     long countFridge = 0;
 
     ArrayAdapter adapter;
@@ -91,12 +93,8 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM); //bellow setSupportActionBar(toolbar);
         getSupportActionBar().setCustomView(R.layout.titlebar);
 
-        Log.i("GETFRIDGE", "onCreate: start");
         getAllFridges();
 
-        Log.i("GETFRIDGE", "onCreate: inside"+mProgressDialog.isShowing());
-
-        Log.i("GETFRIDGE", "onCreate: done");
         //change fridge
         Spinner spinner = (Spinner) findViewById(R.id.fridge_spinner);
         spinner.setOnItemSelectedListener(this);
@@ -107,13 +105,11 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
 
-        Log.i("GETFRIDGE", "onCreate: done with spinner");
-
         ft = getSupportFragmentManager();
         ft.beginTransaction().replace(R.id.fragment_container, mMessagesFragment).commit();
         active = mMessagesFragment;
 
-        
+
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         bottomNavigationView.setSelectedItemId(R.id.fridge);
@@ -121,11 +117,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                if(!fridge_id_list.isEmpty()) {
-                    Log.i("GETFRIDGE", "onCreate: stavit args");
-                    args.putString("fridgeID", fridge_id_list.get(selected_fridge));
-                    args.putString("fridge_name", fridge_list.get(selected_fridge));
-                }
+                fillFragmentParameters();
                 mMessagesFragment.setArguments(args);
                 mGroceryFragment.setArguments(args);
                 mRecipesFragment.setArguments(args);
@@ -153,10 +145,12 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
 
-
-
     }
-
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        getAllFridges();
+    }
 
 
     private void getAllFridges() {
@@ -172,20 +166,23 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     fridge_list.clear();
+                    fridge_id_list.clear();
+                    owner_id_list.clear();
                     // dataSnapshot is the "fridges" node with all children with id userID
                     for (DataSnapshot fridges : snapshot.getChildren()) {
                         Fridge fridgeData = fridges.getValue(Fridge.class);
                         if (!fridgeData.primary) {
                             fridge_list.add(fridgeData.name);
                             fridge_id_list.add(fridges.getKey());
+                            owner_id_list.add(fridgeData.ownerID);
                         } else {
                             fridge_list.add(0, fridgeData.name);
                             fridge_id_list.add(0, fridges.getKey());
+                            owner_id_list.add(0, fridgeData.ownerID);
                         }
                     }
                     adapter.notifyDataSetChanged();
                     countFridge = snapshot.getChildrenCount();
-                    Log.i("GETFRIDGE", "onCreate: filled list");
                     mProgressDialog.dismiss();
                 } else {
                     Toast.makeText(HomeActivity.this, "You dont have any fridges", Toast.LENGTH_LONG).show();
@@ -197,6 +194,28 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                 Toast.makeText(HomeActivity.this, "Something wrong happened with fridge", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void updateFridges(Fridge newFridge, String fridgeKey) {
+        mProgressDialog = new ProgressDialog(this);
+
+        mProgressDialog.setMessage("Loading ...");
+        mProgressDialog.show();
+
+        if (!newFridge.primary) {
+            fridge_list.add(newFridge.name);
+            fridge_id_list.add(fridgeKey);
+            owner_id_list.add(newFridge.ownerID);
+        } else {
+            fridge_list.add(0, newFridge.name);
+            fridge_id_list.add(0, fridgeKey);
+            owner_id_list.add(0, newFridge.ownerID);
+        }
+
+        adapter.notifyDataSetChanged();
+        countFridge = fridge_list.size();
+        mProgressDialog.dismiss();
+
     }
 
 
@@ -215,8 +234,11 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
             case R.id.options_myprofile:
                 Toast.makeText(this, "Will go to myprofile", Toast.LENGTH_SHORT).show();
                 return true;
+            case R.id.options_fridges:
+                Intent intent = new Intent(HomeActivity.this, FridgeSettingsActivity.class);
+                startActivity(intent);
+                return true;
             case R.id.options_newfridge:
-                Log.i("COUNT", "COUNT: " + countFridge);
                 if (countFridge >= 3) {
                     Toast.makeText(this, "You already have 3 fridges", Toast.LENGTH_SHORT).show();
                 } else {
@@ -239,27 +261,33 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         // On selecting a spinner item
+        //String fridgeID = fridge_id_list.get(selected_fridge);
         String fridge_name = parent.getItemAtPosition(pos).toString();
         selected_fridge = (int) id;
+        ownerID = owner_id_list.get(selected_fridge);
 
-        if(!fridge_id_list.isEmpty()) {
-            Log.i("GETFRIDGE", "onCreate: stavit args");
-            args.putString("fridgeID", fridge_id_list.get(selected_fridge));
-            args.putString("fridge_name", fridge_list.get(selected_fridge));
-        }
-        active.setArguments(args);
-        ft = getSupportFragmentManager();
-        ft.beginTransaction().detach(active).attach(active).commit();
-        //String fridgeID = fridge_id_list.get(selected_fridge);
-        //Log.i("MESSFRIDGE", "selFridge: " +selected_fridge);
-        //Log.i("MESSFRIDGE", "selFridge: " +fridge_id_list.get(selected_fridge));
-       //getFridgeMessages();
+        refreshFragment();
+
     }
 
 
 
     public void onNothingSelected(AdapterView<?> arg0) {
         // TODO Auto-generated method stub
+    }
+
+    private void fillFragmentParameters(){
+        if(!fridge_id_list.isEmpty()) {
+            args.putString("fridgeID", fridge_id_list.get(selected_fridge));
+            args.putString("fridge_name", fridge_list.get(selected_fridge));
+            args.putString("ownerID", ownerID);
+        }
+    }
+    private void refreshFragment(){
+        fillFragmentParameters();
+        active.setArguments(args);
+        ft = getSupportFragmentManager();
+        ft.beginTransaction().detach(active).attach(active).commit();
     }
 
     private void createNewFridge() {
@@ -269,8 +297,11 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
         final View customLayout = getLayoutInflater().inflate(R.layout.dialog_create_fridge, null);
         builder.setView(customLayout);
+
+        TextView countF = (TextView) customLayout.findViewById(R.id.dialog_countFridge);
         EditText fridgeName = (EditText) customLayout.findViewById(R.id.dialog_fridge_name);
         CheckBox primaryFridge = (CheckBox) customLayout.findViewById(R.id.dialog_defaultFridge);
+        countF.setText((countFridge+1)+". fridge out of 3");
 
         // add create and cancel buttons
         builder.setPositiveButton(R.string.dialog_create, new DialogInterface.OnClickListener() {
@@ -279,7 +310,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                 String FName = fridgeName.getText().toString();
                 Boolean primary = primaryFridge.isChecked();
                 String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                Fridge fridge = new Fridge(FName, ownerID, primary);
+                Fridge newFridge = new Fridge(FName, ownerID, primary);
                 if (!FName.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null) {
                     FirebaseDatabase.getInstance().getReference().child("fridges").orderByChild("name").equalTo(FName).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -288,21 +319,25 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                                 Toast.makeText(HomeActivity.this, "You already have a fridge with this name", Toast.LENGTH_LONG).show();
                             } else {
                                 String key = FirebaseDatabase.getInstance().getReference().child("fridges").push().getKey();
-                                FirebaseDatabase.getInstance().getReference().child("fridges").child(key).setValue(fridge).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                FirebaseDatabase.getInstance().getReference().child("fridges").child(key).setValue(newFridge).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
                                             Toast.makeText(HomeActivity.this, "Fridge created!", Toast.LENGTH_LONG).show();
-                                            getAllFridges();
+                                            if(primaryFridge.isChecked()) changePrimaryValue(key);
+                                            updateFridges(newFridge, key);
+                                            refreshFragment();
+                                            // ((MessagesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container)).getFridgeMessages(fridge_id_list.get(selected_fridge));
                                         } else {
                                             Toast.makeText(HomeActivity.this, "Failed to create fridge! Try again.", Toast.LENGTH_LONG).show();
 
                                         }
                                     }
                                 });
-                                if(primaryFridge.isChecked()) changePrimaryValue(key);
+
                                 dialog.dismiss();
                             }
+
                         }
 
                         @Override
@@ -349,18 +384,13 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                             HashMap<String, Object> changePrimary = new HashMap<>();
                             changePrimary.put("primary", false);
                             FirebaseDatabase.getInstance().getReference().child("fridges").child(fridges.getKey()).updateChildren(changePrimary);
-                            Log.i("FIREBASE", "CHANGED PRIMARY-" + fridgeData.name);
                         }
-                        //Log.i("FIREBASE", "COUNT" + fridges.getChildrenCount());
-                        //Log.i("FIREBASE", "NAME" + fridges.child("name"));
 
 
                     }
                 } else {
                     Toast.makeText(HomeActivity.this, "You dont have any fridges", Toast.LENGTH_LONG).show();
                 }
-                adapter.notifyDataSetChanged();
-
             }
 
             @Override

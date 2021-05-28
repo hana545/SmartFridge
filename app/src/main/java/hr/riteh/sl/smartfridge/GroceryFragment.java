@@ -43,6 +43,7 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
     private DatabaseReference db = FirebaseDatabase.getInstance().getReference();
     private Query groceries_query;
 
+
     GroceryAdaper groceryAdaper;
     RecyclerView recyclerView;
 
@@ -53,6 +54,9 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
 
     private String fridgeID;
     private String fridge_name;
+    private String ownerId;
+
+    private View view;
 
     private boolean updated_grocery;
 
@@ -71,11 +75,9 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_grocery, container, false);
+        view = inflater.inflate(R.layout.fragment_grocery, container, false);
 
 
-        //////////
-        Log.i("MESSAGEGETFRIDGE", "onCreateView: USAO ");
         recyclerView = view.findViewById(R.id.recycler_view_grocery);
         groceryAdaper = new GroceryAdaper(getActivity(), grocery_list_name, grocery_list_quantity, grocery_list_exp_date, this);
         recyclerView.setAdapter(groceryAdaper);
@@ -85,25 +87,17 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
         if (getArguments() != null){
             fridgeID = getArguments().getString("fridgeID");
             fridge_name = getArguments().getString("fridge_name");
-           // Log.i("MESSAGEGETFRIDGE", "onCreateView: uzme argument id="+fridgeID+" name: "+fridge_name);
+            ownerId = getArguments().getString("ownerID");
             showGroceries();
         } else {
             fridgeID = "null";
             fridge_name = "null";
-           // Log.i("MESSAGEGETFRIDGE", "onCreateView: ne uzme argument");
         }
-
-       // Log.i("MESSAGEGETFRIDGE", "onCreateView: arg="+fridgeID);
-
-
-////////////////
-
 
         FloatingActionButton fab = view.findViewById(R.id.grocery_btn_newGrocery);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               // Log.i("MESSAGEGETFRIDGE", "OnClickNewGrocery: usao");
                 createNewGrocery();
             }
         });
@@ -135,9 +129,10 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
                     Collections.reverse(grocery_list_exp_date);
                     Collections.reverse(grocery_id_list);
                     //System.out.println("tu sam");
+                    view.findViewById(R.id.text_no_groceries).setVisibility(View.INVISIBLE);
 
                 } else {
-                    Toast.makeText(MyApplication.getAppContext(), "You dont have any groceries in "+fridge_name, Toast.LENGTH_LONG).show();
+                    view.findViewById(R.id.text_no_groceries).setVisibility(View.VISIBLE);
                 }
                 groceryAdaper.notifyDataSetChanged();
             }
@@ -150,7 +145,6 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
 
     private void createNewGrocery() {
 
-        //Log.i("MESSAGEGETFRIDGE", "createNewGrocery: pzvano");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         final View customLayout = getLayoutInflater().inflate(R.layout.dialog_create_grocery, null);

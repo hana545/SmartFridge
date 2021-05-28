@@ -5,18 +5,33 @@
     android:layout_height="wrap_content">
 
     <ImageView
+        android:id="@+id/dialog_image"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:background="#C6A5F3EB"
         android:contentDescription="@string/app_name"
         android:scaleType="center"
         android:src="@drawable/gradient_blue_white" />
+
+    <TextView
+        android:id="@+id/dialog_countFridge"
+        android:inputType="textPersonName"
+        android:textStyle="italic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_image"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp" />
+
     <EditText
         android:id="@+id/dialog_fridge_name"
         android:inputType="textPersonName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="105dp"
+        android:layout_below="@+id/dialog_countFridge"
+        android:layout_marginTop="5dp"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
@@ -24,10 +39,11 @@
 
     <CheckBox
         android:id="@+id/dialog_defaultFridge"
+        android:layout_below="@+id/dialog_fridge_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Set as default fridge"
-        android:layout_marginTop="150dp"/>
+        android:layout_marginTop="5dp"/>
 
 
 </RelativeLayout>

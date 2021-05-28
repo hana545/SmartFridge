@@ -5,13 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_white_blue"
-   >
+    >
+    <TextView
+        android:id="@+id/text_no_messages"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="You dont have any messages"
+        android:gravity="center_vertical"
+        android:textSize="22sp"
+        android:layout_centerHorizontal="true"
+        app:layout_constraintHorizontal_bias="0.5"
+        android:visibility="visible"
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_messages"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="56dp"
+        android:layout_marginBottom="0dp"
         android:layout_marginTop="0dp"
         >
     </androidx.recyclerview.widget.RecyclerView>

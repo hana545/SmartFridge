@@ -10,6 +10,12 @@
 
         />
     <item
+        android:title="Manage fridges"
+        android:id="@+id/options_fridges"
+        app:showAsAction="never"
+
+        />
+    <item
         android:title="Add new fridge"
         android:id="@+id/options_newfridge"
         app:showAsAction="never"

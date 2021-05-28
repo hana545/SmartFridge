@@ -66,11 +66,10 @@ public class GroceryItemFragment extends Fragment {
             grocery_id = getArguments().getString("selected_grocery");
             fridgeID = getArguments().getString("fridgeID");
             fridge_name = getArguments().getString("fridge_name");
-            //Log.i("MESSAGEGETFRIDGE", "ITEM: uzme argument arg="+grocery_id);
-
         } else {
-
-            //Log.i("MESSAGEGETFRIDGE", "ITEM: ne uzme argument");
+            grocery_id = "";
+            fridgeID = "";
+            fridge_name = "";
         }
 
         fillGroceryData();
@@ -98,11 +97,6 @@ public class GroceryItemFragment extends Fragment {
                 deleteGrocery();
                 ft.beginTransaction().replace(R.id.fragment_container, mGroceryFragment).addToBackStack(null).commit();
 
-
-                /*
-                Intent intent = new Intent(GroceryItemActivity.this, GroceryActivity.class);
-                intent.putExtra("grocery_updated", false);
-                startActivity(intent);*/
             }
         });
 

@@ -7,11 +7,23 @@
     android:background="@drawable/gradient_white_blue"
     >
 
+    <TextView
+        android:id="@+id/text_no_groceries"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="You dont have any groceries"
+        android:gravity="center_vertical"
+        android:textSize="22sp"
+        android:layout_centerHorizontal="true"
+        app:layout_constraintHorizontal_bias="0.5"
+        android:visibility="visible"
+        />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_grocery"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="56dp"
+        android:layout_marginBottom="0dp"
         android:layout_marginTop="0dp"
         >
 

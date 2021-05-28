@@ -10,7 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartFridge">
-
+        <activity android:name=".FridgeSettingsActivity"></activity>
         <activity
             android:name=".RegisterActivity"
             android:theme="@style/Theme.SmartFridge.NoActionBar"
@@ -23,8 +23,7 @@
         <activity
             android:name=".LoginActivity"
             android:theme="@style/Theme.SmartFridge.NoActionBar"
-            android:windowSoftInputMode="adjustResize|stateVisible">
-        </activity>
+            android:windowSoftInputMode="adjustResize|stateVisible"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

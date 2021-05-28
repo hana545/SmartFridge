@@ -1,6 +1,8 @@
 package hr.riteh.sl.smartfridge;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
@@ -15,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -46,7 +49,7 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
     private static RecyclerView recyclerView;
 
     private static Query mess_query;
-    private DatabaseReference db;
+    private DatabaseReference db =  FirebaseDatabase.getInstance().getReference();;
 
     private static List<String> messages_list_text = new ArrayList<String>();
     private static List<String> messages_list_author= new ArrayList<String>();
@@ -54,6 +57,7 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
 
     private String fridgeID;
     private String fridge_name;
+    private String ownerId;
 
     private View view;
 
@@ -77,11 +81,13 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
         if (getArguments() != null){
             fridgeID = getArguments().getString("fridgeID");
             fridge_name = getArguments().getString("fridge_name");
+            ownerId = getArguments().getString("ownerID");
             //Log.i("MESSAGEGETFRIDGE", "onCreateView: uzme argument arg="+fridgeID);
-            getFridgeMessages();
+            getFridgeMessages(fridgeID);
         } else {
             fridgeID = "null";
             fridge_name = "null";
+            ownerId =  "null";
             //Log.i("MESSAGEGETFRIDGE", "onCreateView: ne uzme argument");
         }
 
@@ -102,7 +108,7 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
         return view;
     }
 
-    public void getFridgeMessages() {
+    public void getFridgeMessages(String fridgeID) {
         //Log.i("MESSAGEGETFRIDGE", "getFridgeMessages: pzvano");
         mess_query = FirebaseDatabase.getInstance().getReference().child("messages").orderByChild("fridgeID").equalTo(fridgeID);
         mess_query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -114,15 +120,18 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
                 if (snapshot.exists()) {
                     for (DataSnapshot mess : snapshot.getChildren()) {
                         Message messData = mess.getValue(Message.class);
-                        messages_list_text.add(messData.text);
-                        messages_list_author.add(messData.author);
-                        messages_id_list.add(mess.getKey());
+                        if (messData != null){
+                            messages_list_text.add(messData.text);
+                            messages_list_author.add(messData.author);
+                            messages_id_list.add(mess.getKey());
+                        }
                     }
                     Collections.reverse(messages_id_list);
                     Collections.reverse(messages_list_author);
                     Collections.reverse(messages_list_text);
+                    view.findViewById(R.id.text_no_messages).setVisibility(View.INVISIBLE);
                 } else{
-                    Toast.makeText(MyApplication.getAppContext(), "You dont have any messages "+fridge_name, Toast.LENGTH_LONG).show();
+                    view.findViewById(R.id.text_no_messages).setVisibility(View.VISIBLE);
                 }
                 messageAdapter.notifyDataSetChanged();
             }
@@ -153,13 +162,13 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
                 // Log.i("INSERTMESS", "fridge: "+ fridgeId);
                 Message msg = new Message(text, author_name, fridgeId);
 
-                if (!text.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null) {
+                if (!text.matches("") && text.length() < 400 && FirebaseAuth.getInstance().getCurrentUser() != null) {
                     //username_textview.setText(msg.text);
                     FirebaseDatabase.getInstance().getReference().child("messages").push().setValue(msg).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                getFridgeMessages();
+                                getFridgeMessages(fridgeID);
                                 Toast.makeText(getActivity(), "Message posted!", Toast.LENGTH_LONG).show();
 
                             } else {
@@ -187,8 +196,57 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
     }
 
     @Override
-    public void onMessageClick(int position) {
-        ///displays dialog with message
+    public void onMessageClick(int position) {  ///////////////PROMJENIT DISPLAY NAME U ID!!!!!!!!!!!!
+        String messageID = messages_id_list.get(position);
+        final String authorID = messages_list_author.get(position);
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+
+        Dialog dialog = new Dialog(getActivity());
+        dialog.setCancelable(true);
+
+        View view  = getActivity().getLayoutInflater().inflate(R.layout.dialog_show_message, null);
+        dialog.setContentView(view);
+
+
+        TextView textMessage = (TextView) view.findViewById(R.id.dialog_show_message_text);
+        Button btn_deleteMessage = (Button) view.findViewById(R.id.dialog_delete_message);
+
+        mess_query = db.child("messages").child(messageID);
+        mess_query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Message messData = snapshot.getValue(Message.class);
+                if (messData != null){
+                    textMessage.setText(messData.text);
+                    if (authorID.equals(userId) || userId.equals(ownerId)){
+                        btn_deleteMessage.setVisibility(View.VISIBLE);
+                        btn_deleteMessage.setOnClickListener(new View.OnClickListener(){
+                            @Override
+                            public void onClick(View view) {
+                                messages_list_text.remove(position);
+                                messages_list_author.remove(position);
+                                messages_id_list.remove(position);
+                                messageAdapter.notifyDataSetChanged();
+                                dialog.cancel();
+                            DatabaseReference mPostReference = FirebaseDatabase.getInstance().getReference()
+                                    .child("messages").child(messageID);
+                            mPostReference.removeValue();
+
+
+                            }
+                        });
+                    }
+                }
+
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MyApplication.getAppContext(), "Something wrong happened with showing message", Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+        dialog.show();
     }
 
 }
