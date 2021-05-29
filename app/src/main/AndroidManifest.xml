@@ -15,16 +15,13 @@
             android:name=".RegisterActivity"
             android:theme="@style/Theme.SmartFridge.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateVisible" />
-        <activity android:name=".StoresActivity" />
-        <activity android:name=".RecipesActivity" />
-        <activity android:name=".GroceryActivity" />
-        <activity android:name=".GroceryItemActivity" />
         <activity android:name=".HomeActivity" />
         <activity
             android:name=".LoginActivity"
             android:theme="@style/Theme.SmartFridge.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateVisible"></activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:theme="@style/Theme.SmartFridge.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

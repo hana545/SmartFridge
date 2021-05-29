@@ -7,58 +7,124 @@
     android:layout_height="match_parent"
     tools:context=".FridgeSettingsActivity"
     android:background="@drawable/gradient_white_blue"
-        >
-
+    >
+    <!--First fridge-->
     <TextView
         android:id="@+id/settings_name1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="90dp"
+        android:layout_marginTop="50dp"
         android:ems="10"
+        android:visibility="invisible"
         android:text="First fridge:"
         android:textAlignment="viewStart"
         android:gravity="start"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/settings_fridge_name1"
-        android:layout_width="wrap_content"
+        android:layout_width="170dp"
         android:layout_height="44dp"
         android:layout_marginTop="8dp"
+        android:inputType="textPersonName"
         android:ems="10"
-        android:focusable="false"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/settings_name1"/>
 
     <Button
+        android:id="@+id/settings_people_fridge1"
+        android:enabled="false"
+        android:layout_width="56dp"
+        android:layout_height="49dp"
+        android:drawableTop="@drawable/ic_group_people"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name1" />
+
+    <Button
+        android:id="@+id/settings_add_people_fridge1"
+        android:enabled="false"
+        android:layout_width="56dp"
+        android:layout_height="49dp"
+        android:drawableTop="@drawable/ic_person_add"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name1" />
+
+    <Button
         android:id="@+id/settings_delete_fridge1"
+        android:enabled="false"
         android:layout_width="56dp"
         android:layout_height="49dp"
         android:drawableTop="@android:drawable/ic_delete"
-        android:enabled="false"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.9"
+        app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/settings_name1" />
+        app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name1" />
 
+    <!--Second fridge-->
     <TextView
         android:id="@+id/settings_name2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp"
         android:ems="10"
+        android:visibility="invisible"
         android:text="Second fridge: "
         android:textAlignment="viewStart"
         android:gravity="start"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settings_delete_fridge1" />
+
+    <EditText
+        android:id="@+id/settings_fridge_name2"
+        android:layout_width="170dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="8dp"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settings_name2" />
+
+    <Button
+        android:id="@+id/settings_people_fridge2"
+        android:enabled="false"
+        android:layout_width="56dp"
+        android:layout_height="49dp"
+        android:drawableTop="@drawable/ic_group_people"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.3"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name1" />
+        app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name2"/>
+
+    <Button
+        android:id="@+id/settings_add_people_fridge2"
+        android:enabled="false"
+        android:layout_width="56dp"
+        android:layout_height="49dp"
+        android:drawableTop="@drawable/ic_person_add"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name2" />
 
     <Button
         android:id="@+id/settings_delete_fridge2"
@@ -66,49 +132,66 @@
         android:layout_width="56dp"
         android:layout_height="49dp"
         android:drawableTop="@android:drawable/ic_delete"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.9"
+        app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/settings_name2"/>
+        app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name2"/>
 
-    <EditText
-        android:id="@+id/settings_fridge_name2"
-        android:layout_width="wrap_content"
-        android:layout_height="44dp"
-        android:layout_marginTop="8dp"
-        android:ems="10"
-        android:focusable="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.3"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/settings_name2" />
 
+    <!--Third fridge-->
     <TextView
         android:id="@+id/settings_name3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp"
         android:ems="10"
+        android:visibility="invisible"
         android:text="Third fridge: "
         android:textAlignment="viewStart"
         android:gravity="start"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name2"
-     />
+        app:layout_constraintTop_toBottomOf="@+id/settings_delete_fridge2"
+        />
 
     <EditText
         android:id="@+id/settings_fridge_name3"
-        android:layout_width="wrap_content"
+        android:layout_width="170dp"
         android:layout_height="44dp"
         android:layout_marginTop="8dp"
+        android:inputType="textPersonName"
         android:ems="10"
-        android:focusable="false"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settings_name3" />
+
+    <Button
+        android:id="@+id/settings_people_fridge3"
+        android:enabled="false"
+        android:layout_width="56dp"
+        android:layout_height="49dp"
+        android:drawableTop="@drawable/ic_group_people"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.3"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/settings_name3" />
+        app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name3"/>
+
+    <Button
+        android:id="@+id/settings_add_people_fridge3"
+        android:enabled="false"
+        android:layout_width="56dp"
+        android:layout_height="49dp"
+        android:drawableTop="@drawable/ic_person_add"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name3" />
 
     <Button
         android:id="@+id/settings_delete_fridge3"
@@ -116,31 +199,52 @@
         android:layout_width="56dp"
         android:layout_height="49dp"
         android:drawableTop="@android:drawable/ic_delete"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.9"
+        app:layout_constraintHorizontal_bias="0.6"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/settings_name3"/>
+        app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name3"/>
 
+
+    <!--for adding new fridgess-->
+
+    <Button
+        android:id="@+id/settings_add_new"
+        android:enabled="false"
+        android:layout_marginTop="50dp"
+        android:layout_width="200dp"
+        android:layout_height="49dp"
+        android:drawableTop="@drawable/ic_add"
+        android:backgroundTint="@color/logo_background"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settings_delete_fridge2" />
+
+
+    <!--For default fridge-->
     <TextView
         android:id="@+id/settings_default_fridge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="60dp"
         android:ems="10"
+        android:visibility="visible"
         android:gravity="center_horizontal"
         android:text="Default fridge: "
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name3" />
+        app:layout_constraintTop_toBottomOf="@+id/settings_add_new" />
 
     <Spinner
         android:id="@+id/settings_fridge_spinner"
         style="@style/Widget.AppCompat.DropDownItem.Spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="10dp"
         android:padding="15dp"
         android:spinnerMode="dropdown"
         android:textColor="#FFFFFF"
@@ -153,7 +257,7 @@
         android:id="@+id/settings_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="90dp"
+        android:layout_marginTop="60dp"
         android:text="Save settings"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
