@@ -26,7 +26,7 @@
         android:id="@+id/textView"
         android:layout_width="347dp"
         android:layout_height="84dp"
-        android:fontFamily="@font/satisfy"
+        android:fontFamily="@font/satisfy_regular"
         android:gravity="center"
         android:letterSpacing="0.1"
         android:lineSpacingExtra="15sp"

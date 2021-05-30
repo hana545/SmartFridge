@@ -47,8 +47,9 @@ public class GroceryItemActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grocery_item);
+    }
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+         /*  BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         bottomNavigationView.setSelectedItemId(R.id.grocery);
 
@@ -80,7 +81,7 @@ public class GroceryItemActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM); //bellow setSupportActionBar(toolbar);
         getSupportActionBar().setCustomView(R.layout.titlebar);
 
-        Bundle extras = getIntent().getExtras();
+     Bundle extras = getIntent().getExtras();
         grocery_id = extras.getString("selected_grocery");
         editName = findViewById(R.id.grocery_item_name);
         editQuantity = findViewById(R.id.grocery_item_quantity);
@@ -175,5 +176,5 @@ public class GroceryItemActivity extends AppCompatActivity {
 
         });
 
-    }
+    }*/
 }

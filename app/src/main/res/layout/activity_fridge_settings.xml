@@ -8,29 +8,43 @@
     tools:context=".FridgeSettingsActivity"
     android:background="@drawable/gradient_white_blue"
     >
+    <TextView
+        android:id="@+id/settings_title"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:visibility="visible"
+        android:text="These are the fridges you created"
+        android:fontFamily="@font/architectsdaughter_regular"
+        android:gravity="center_horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
     <!--First fridge-->
     <TextView
         android:id="@+id/settings_name1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="30dp"
         android:ems="10"
         android:visibility="invisible"
         android:text="First fridge:"
-        android:textAlignment="viewStart"
-        android:gravity="start"
+        android:gravity="center_horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/settings_title" />
 
     <EditText
         android:id="@+id/settings_fridge_name1"
-        android:layout_width="170dp"
+        android:layout_width="250dp"
         android:layout_height="44dp"
         android:layout_marginTop="8dp"
         android:inputType="textPersonName"
         android:ems="10"
+        android:maxLength="25"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -82,8 +96,7 @@
         android:ems="10"
         android:visibility="invisible"
         android:text="Second fridge: "
-        android:textAlignment="viewStart"
-        android:gravity="start"
+        android:gravity="center_horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -91,11 +104,12 @@
 
     <EditText
         android:id="@+id/settings_fridge_name2"
-        android:layout_width="170dp"
+        android:layout_width="250dp"
         android:layout_height="44dp"
         android:layout_marginTop="8dp"
         android:inputType="textPersonName"
         android:ems="10"
+        android:maxLength="25"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -148,8 +162,7 @@
         android:ems="10"
         android:visibility="invisible"
         android:text="Third fridge: "
-        android:textAlignment="viewStart"
-        android:gravity="start"
+        android:gravity="center_horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -158,11 +171,12 @@
 
     <EditText
         android:id="@+id/settings_fridge_name3"
-        android:layout_width="170dp"
+        android:layout_width="250dp"
         android:layout_height="44dp"
         android:layout_marginTop="8dp"
         android:inputType="textPersonName"
         android:ems="10"
+        android:maxLength="25"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -201,7 +215,7 @@
         android:drawableTop="@android:drawable/ic_delete"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.6"
+        app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/settings_fridge_name3"/>
 

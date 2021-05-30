@@ -53,6 +53,7 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
 
     private static List<String> messages_list_text = new ArrayList<String>();
     private static List<String> messages_list_author= new ArrayList<String>();
+    private static List<String> messages_list_authorID= new ArrayList<String>();
     private static List<String> messages_id_list = new ArrayList<String>();
 
     private String fridgeID;
@@ -72,7 +73,6 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_messages, container, false);
 
-        //Log.i("MESSAGEGETFRIDGE", "onCreateView: USAO ");
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view_messages);
         messageAdapter = new MessageAdapter(getActivity(), messages_list_text, messages_list_author,this);
         recyclerView.setAdapter(messageAdapter);
@@ -82,18 +82,12 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
             fridgeID = getArguments().getString("fridgeID");
             fridge_name = getArguments().getString("fridge_name");
             ownerId = getArguments().getString("ownerID");
-            //Log.i("MESSAGEGETFRIDGE", "onCreateView: uzme argument arg="+fridgeID);
             getFridgeMessages(fridgeID);
         } else {
             fridgeID = "null";
             fridge_name = "null";
             ownerId =  "null";
-            //Log.i("MESSAGEGETFRIDGE", "onCreateView: ne uzme argument");
         }
-
-
-
-        //Log.i("MESSAGEGETFRIDGE", "onCreateView: arg="+fridgeID);
 
 
 ////////////////
@@ -109,13 +103,13 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
     }
 
     public void getFridgeMessages(String fridgeID) {
-        //Log.i("MESSAGEGETFRIDGE", "getFridgeMessages: pzvano");
         mess_query = FirebaseDatabase.getInstance().getReference().child("messages").orderByChild("fridgeID").equalTo(fridgeID);
         mess_query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 messages_id_list.clear();
                 messages_list_author.clear();
+                messages_list_authorID.clear();
                 messages_list_text.clear();
                 if (snapshot.exists()) {
                     for (DataSnapshot mess : snapshot.getChildren()) {
@@ -123,11 +117,13 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
                         if (messData != null){
                             messages_list_text.add(messData.text);
                             messages_list_author.add(messData.author);
+                            messages_list_authorID.add(messData.authorID);
                             messages_id_list.add(mess.getKey());
                         }
                     }
                     Collections.reverse(messages_id_list);
                     Collections.reverse(messages_list_author);
+                    Collections.reverse(messages_list_authorID);
                     Collections.reverse(messages_list_text);
                     view.findViewById(R.id.text_no_messages).setVisibility(View.INVISIBLE);
                 } else{
@@ -158,9 +154,9 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
             public void onClick(DialogInterface dialog, int which) {
                 String text = message_text.getText().toString();
                 String author_name = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+                String author_id = FirebaseAuth.getInstance().getCurrentUser().getUid();
                 String fridgeId = fridgeID;
-                // Log.i("INSERTMESS", "fridge: "+ fridgeId);
-                Message msg = new Message(text, author_name, fridgeId);
+                Message msg = new Message(text, author_name, author_id, fridgeId);
 
                 if (!text.matches("") && text.length() < 400 && FirebaseAuth.getInstance().getCurrentUser() != null) {
                     //username_textview.setText(msg.text);
@@ -198,8 +194,8 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
     @Override
     public void onMessageClick(int position) {  ///////////////PROMJENIT DISPLAY NAME U ID!!!!!!!!!!!!
         String messageID = messages_id_list.get(position);
-        final String authorID = messages_list_author.get(position);
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        final String authorID = messages_list_authorID.get(position);
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         Dialog dialog = new Dialog(getActivity());
         dialog.setCancelable(true);
@@ -218,12 +214,13 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
                 Message messData = snapshot.getValue(Message.class);
                 if (messData != null){
                     textMessage.setText(messData.text);
-                    if (authorID.equals(userId) || userId.equals(ownerId)){
+                    if (authorID.equals(userId)){
                         btn_deleteMessage.setVisibility(View.VISIBLE);
                         btn_deleteMessage.setOnClickListener(new View.OnClickListener(){
                             @Override
                             public void onClick(View view) {
                                 messages_list_text.remove(position);
+                                messages_list_authorID.remove(position);
                                 messages_list_author.remove(position);
                                 messages_id_list.remove(position);
                                 messageAdapter.notifyDataSetChanged();

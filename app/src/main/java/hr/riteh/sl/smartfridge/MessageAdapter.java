@@ -37,8 +37,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         String shortMess;
-        if (text.get(position).length() > 36) shortMess = StringUtils.substring(text.get(position), 0, 36) + "... ";
         shortMess = text.get(position);
+        if (text.get(position).length() > 36) shortMess = StringUtils.substring(text.get(position), 0, 36) + "... ";
         holder.row_text.setText(shortMess);
         holder.row_author.setText("- "+author.get(position));
     }

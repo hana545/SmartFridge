@@ -19,6 +19,7 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
         android:text=""
+        android:fontFamily="@font/architectsdaughter_regular"
         android:textSize="18sp"
         android:id="@+id/dialog_show_message_text"
         android:ems="10"
@@ -33,7 +34,7 @@
         android:id="@+id/dialog_delete_message"
         android:layout_below="@+id/dialog_show_message_text"
         android:backgroundTint="#ff8080"
-        android:visibility="visible"
+        android:visibility="invisible"
         android:text="Delete"
 
         />

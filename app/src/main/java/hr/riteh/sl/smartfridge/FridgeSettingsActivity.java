@@ -3,7 +3,6 @@ package hr.riteh.sl.smartfridge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -12,6 +11,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -25,8 +26,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -39,23 +40,30 @@ import java.util.HashMap;
 import java.util.List;
 
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Fridge;
-import hr.riteh.sl.smartfridge.FirebaseDatabase.Message;
+import hr.riteh.sl.smartfridge.FirebaseDatabase.MyFridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.User;
 
 public class FridgeSettingsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     ArrayAdapter adapter;
+    FirebaseUser Fuser = FirebaseAuth.getInstance().getCurrentUser();
+    String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
     DatabaseReference db = FirebaseDatabase.getInstance().getReference();
 
     private List<String> fridge_list = new ArrayList<String>();
     private List<String> fridge_id_list = new ArrayList<String>();
 
-    private List<String> fridge_new_names = new ArrayList<String>();
+    private List<String> my_fridge_list = new ArrayList<String>();
+    private List<String> my_fridge_id_list = new ArrayList<String>();
 
-    private String primary_old;
-    private String primary_new;
+    private List<String> fridge_new_names = new ArrayList<String>();
+    String memberID;
+
+    private String primaryId_old;
+    private String primaryId_new;
     int selected_fridge = 0;
-    int countFridge = 0;
+    int countMyFridge = 0;
+    int countAllFridge = 0;
 
     EditText fridge1;
     EditText fridge2;
@@ -122,29 +130,63 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
         bnt_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!primary_new.equals(primary_old)   ) {
-                  updatePrimaryFridges(fridge_id_list.get(selected_fridge));
-                }
+
+                Boolean changePrimary = false;
+                Boolean changeNames = false;
+
                 fridge_new_names.add(fridge1.getText().toString());
                 fridge_new_names.add(fridge2.getText().toString());
                 fridge_new_names.add(fridge3.getText().toString());
-                for (Integer i = 0; i < countFridge; i++) {
+                Log.i("CHANGENAME", "new names: "+fridge_new_names);
+                for (Integer i = 0; i < countMyFridge; i++) {
                     if (fridge_new_names.get(i).equals("")) {
                         Toast.makeText(FridgeSettingsActivity.this, "Name can not be empty or the same as old one", Toast.LENGTH_LONG).show();
-                    } else if (fridge_new_names.get(i).length() > 15) {
-                        Toast.makeText(FridgeSettingsActivity.this, "Name is to long", Toast.LENGTH_LONG).show();
-                    } else if (!fridge_new_names.get(i).equals(fridge_list.get(i))) {
-                        updateNameFridge(fridge_id_list.get(i), fridge_new_names.get(i));
-                    } else {
-                        Intent intent = getIntent();
-                        finish();
-                        startActivity(intent);
+                    } else if (fridge_new_names.get(i).length() > 25) {
+                        Toast.makeText(FridgeSettingsActivity.this, "Name for fridge:"+ my_fridge_list.get(i) +" is to long", Toast.LENGTH_LONG).show();
+                    } else if (!fridge_new_names.get(i).equals(my_fridge_list.get(i))) {
+                        updateNameFridge(my_fridge_id_list.get(i), fridge_new_names.get(i));
+
+                        Integer index = fridge_id_list.indexOf(my_fridge_id_list.get(i));
+                        my_fridge_list.set(i, fridge_new_names.get(i));
+                        fridge_list.set(index, fridge_new_names.get(i));
+                        changeNames = true;
                     }
                 }
+                fridge_new_names.clear();
+
+                if (!primaryId_new.equals(primaryId_old)   ) {
+                    updatePrimaryFridges(fridge_id_list.get(selected_fridge));
+
+                    String pFridgeName = fridge_list.get(selected_fridge);
+                    String pFridgeID = fridge_id_list.get(selected_fridge);
+                    fridge_id_list.remove(selected_fridge);
+                    fridge_list.remove(selected_fridge);
+                    fridge_id_list.add(0, pFridgeID);
+                    fridge_list.add(0, pFridgeName);
+                    if (my_fridge_id_list.contains(pFridgeID)){
+                        my_fridge_id_list.remove(pFridgeID);
+                        my_fridge_list.remove(pFridgeName);
+                        my_fridge_id_list.add(0, pFridgeID);
+                        my_fridge_list.add(0, pFridgeName);
+                    }
+
+                    primaryId_old = pFridgeID;
+                  changePrimary = true;
+                }
+
+                if(changeNames || changePrimary){
+                    Log.i("CHANGENAME", "/////////////:");
+                    fillData();
+
+                    Toast.makeText(FridgeSettingsActivity.this, "Saved changes", Toast.LENGTH_LONG).show();
+                }
+
+
             }
         });
 
     }
+
 
 
     private void checkFridges() {
@@ -174,8 +216,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
         // On selecting a spinner item
         String fridge_name = parent.getItemAtPosition(position).toString();
         selected_fridge = (int) id;
-       //Log.i("SETTTINGSFRIDGE", "selektira neki u spinneru");
-        if(!fridge_id_list.isEmpty()) primary_new = fridge_id_list.get(selected_fridge);
+        if(!fridge_id_list.isEmpty()) primaryId_new = fridge_id_list.get(selected_fridge);
     }
 
     @Override
@@ -188,31 +229,39 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
 
         mProgressDialog.setMessage("Loading ...");
         mProgressDialog.show();
-        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        Query fridges_query = FirebaseDatabase.getInstance().getReference().child("fridges").orderByChild("ownerID").equalTo(userID);
+        Query fridges_query = FirebaseDatabase.getInstance().getReference().child("myFridges").child(userID);
 
-       //Log.i("SETTTINGSFRIDGE", "ide uzet frigeve");
         fridges_query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     fridge_list.clear();
                     fridge_id_list.clear();
+                    my_fridge_id_list.clear();
+                    my_fridge_list.clear();
                     // dataSnapshot is the "fridges" node with all children with id userID
                     for (DataSnapshot fridges : snapshot.getChildren()) {
-                        Fridge fridgeData = fridges.getValue(Fridge.class);
+                        MyFridge fridgeData = fridges.getValue(MyFridge.class);
                         if (!fridgeData.primary) {
                             fridge_list.add(fridgeData.name);
                             fridge_id_list.add(fridges.getKey());
+                            if (fridgeData.ownerID.equals(userID)) {
+                                my_fridge_id_list.add(fridges.getKey());
+                                my_fridge_list.add(fridgeData.name);
+                            }
                         } else {
-                            primary_old = fridges.getKey();
+                            primaryId_old = fridges.getKey();
                             fridge_list.add(0, fridgeData.name);
                             fridge_id_list.add(0, fridges.getKey());
+                            if (fridgeData.ownerID.equals(userID)) {
+                                my_fridge_id_list.add(0, fridges.getKey());
+                                my_fridge_list.add(0, fridgeData.name);
+                            }
                         }
                     }
-                    countFridge = fridge_list.size();
+                    countAllFridge = fridge_list.size();
+                    countMyFridge = my_fridge_list.size();
                     fillData();
-                    adapter.notifyDataSetChanged();
                     mProgressDialog.dismiss();
                 } else {
                     Toast.makeText(FridgeSettingsActivity.this, "You dont have any fridges", Toast.LENGTH_LONG).show();
@@ -235,7 +284,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
         btn_new_fridge.setVisibility(View.VISIBLE);
         btn_new_fridge.setEnabled(true);
 
-        if(countFridge > 0){
+        if(countMyFridge > 0){
             fridge1.setVisibility(View.VISIBLE);
             findViewById(R.id.settings_name1).setVisibility(View.VISIBLE);
             btn_del_fridge1.setEnabled(true);
@@ -244,9 +293,9 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
             btn_add_people_fridge1.setVisibility(View.VISIBLE);
             btn_people_fridge1.setEnabled(true);
             btn_people_fridge1.setVisibility(View.VISIBLE);
-            fridge1.setText(fridge_list.get(0));
+            fridge1.setText(my_fridge_list.get(0));
         }
-        if(countFridge > 1){
+        if(countMyFridge > 1){
             fridge2.setVisibility(View.VISIBLE);
             findViewById(R.id.settings_name2).setVisibility(View.VISIBLE);
             btn_del_fridge2.setEnabled(true);
@@ -255,9 +304,9 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
             btn_add_people_fridge2.setVisibility(View.VISIBLE);
             btn_people_fridge2.setEnabled(true);
             btn_people_fridge2.setVisibility(View.VISIBLE);
-            fridge2.setText(fridge_list.get(1));
+            fridge2.setText(my_fridge_list.get(1));
         }
-        if(countFridge > 2){
+        if(countMyFridge > 2){
             fridge3.setVisibility(View.VISIBLE);
             findViewById(R.id.settings_name3).setVisibility(View.VISIBLE);
             btn_del_fridge3.setEnabled(true);
@@ -266,19 +315,20 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
             btn_add_people_fridge3.setVisibility(View.VISIBLE);
             btn_people_fridge3.setEnabled(true);
             btn_people_fridge3.setVisibility(View.VISIBLE);
-            fridge3.setText(fridge_list.get(2));
+            fridge3.setText(my_fridge_list.get(2));
 
             btn_new_fridge.setVisibility(View.INVISIBLE);
             btn_new_fridge.setEnabled(false);
         }
         checkFridges();
+        adapter.notifyDataSetChanged();
 
         //check delete buttons
         if(btn_del_fridge1.isEnabled()) {
             btn_del_fridge1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    dialog_delete_fridge(fridge_id_list.get(0), 0);
+                    dialog_delete_fridge(my_fridge_id_list.get(0), 0);
                 }
             });
         }
@@ -286,7 +336,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
             btn_del_fridge2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    dialog_delete_fridge(fridge_id_list.get(1), 1);
+                    dialog_delete_fridge(my_fridge_id_list.get(1), 1);
                 }
             });
         }
@@ -295,7 +345,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
             btn_del_fridge3.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    dialog_delete_fridge(fridge_id_list.get(2), 2);
+                    dialog_delete_fridge(my_fridge_id_list.get(2), 2);
                 }
             });
         }
@@ -304,7 +354,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
             btn_add_people_fridge1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    addNewMember(0);
+                    addNewMember(my_fridge_id_list.get(0), my_fridge_list.get(0));
                 }
             });
         }
@@ -312,7 +362,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
             btn_add_people_fridge2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    addNewMember(1);
+                    addNewMember(my_fridge_id_list.get(1), my_fridge_list.get(1));
                 }
             });
         }
@@ -321,7 +371,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
             btn_add_people_fridge3.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    addNewMember(2);
+                    addNewMember(my_fridge_id_list.get(2), my_fridge_list.get(2));
                 }
             });
         }
@@ -347,7 +397,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
         TextView countF = (TextView) customLayout.findViewById(R.id.dialog_countFridge);
         EditText fridgeName = (EditText) customLayout.findViewById(R.id.dialog_fridge_name);
         CheckBox primaryFridge = (CheckBox) customLayout.findViewById(R.id.dialog_defaultFridge);
-        countF.setText((countFridge+1)+". fridge out of 3");
+        countF.setText((countMyFridge+1)+". fridge out of 3");
 
         // add create and cancel buttons
         builder.setPositiveButton(R.string.dialog_create, new DialogInterface.OnClickListener() {
@@ -355,25 +405,27 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
             public void onClick(DialogInterface dialog, int which) {
                 String FName = fridgeName.getText().toString();
                 Boolean primary = primaryFridge.isChecked();
-                String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                Fridge newFridge = new Fridge(FName, ownerID, primary);
-                if (!FName.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null && FName.length() < 15) {
-                    db.child("fridges").orderByChild("name").equalTo(FName).addListenerForSingleValueEvent(new ValueEventListener() {
+
+                Fridge newFridge = new Fridge(FName, userID);
+                MyFridge newMyFridge = new MyFridge(FName, userID, primary);
+                User newUser = new User(Fuser.getDisplayName(), Fuser.getEmail());
+                if (!FName.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null && FName.length() < 25) {
+                    db.child("myFridges").child(userID).orderByChild("name").equalTo(FName).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists()) {
                                 Toast.makeText(FridgeSettingsActivity.this, "You already have a fridge with this name", Toast.LENGTH_LONG).show();
                             } else {
                                 String key = FirebaseDatabase.getInstance().getReference().child("fridges").push().getKey();
+                                db.child("myFridges").child(userID).child(key).setValue(newMyFridge);
+                                db.child("fridgeMembers").child(key).child(userID).setValue(newUser);
                                 db.child("fridges").child(key).setValue(newFridge).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
                                             Toast.makeText(FridgeSettingsActivity.this, "Fridge created!", Toast.LENGTH_LONG).show();
                                             if(primaryFridge.isChecked()) updatePrimaryFridges(key);
-                                            Intent intent = getIntent();
-                                            finish();
-                                            startActivity(intent);
+                                            getAllFridges();
                                             // ((MessagesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container)).getFridgeMessages(fridge_id_list.get(selected_fridge));
                                         } else {
                                             Toast.makeText(FridgeSettingsActivity.this, "Failed to create fridge! Try again.", Toast.LENGTH_LONG).show();
@@ -395,7 +447,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
                         }
                     });
 
-                } else if (FName.length() > 15) {
+                } else if (FName.length() > 25) {
                     Toast.makeText(FridgeSettingsActivity.this, "Name is to long", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(FridgeSettingsActivity.this, "You must give a name", Toast.LENGTH_LONG).show();
@@ -415,10 +467,9 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
 
     }
 
-    private void addNewMember(Integer selected_fridge) {
+    private void addNewMember(String selected_fridge_id, String fridge_name) {
 
-        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String userEmail = Fuser.getEmail();
 
         Dialog dialog = new Dialog(this);
         dialog.setCancelable(true);
@@ -435,7 +486,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
             @Override
             public void onClick(View view) {
                 String newEmail = memberEmail.getText().toString();
-                Fridge currentFridge = new Fridge(fridge_list.get(selected_fridge), userID, false);
+                MyFridge currentFridge = new MyFridge(fridge_name, userID, false);
 
                 if (!newEmail.equals("") && newEmail.contains("@") && !newEmail.equals(userEmail)) {
                     db.child("users").addValueEventListener(new ValueEventListener() {
@@ -443,6 +494,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists()) {
                                 String memberID = "";
+                                User newMember = new User();
                                 for (DataSnapshot users : snapshot.getChildren()) {
                                     User userData = users.getValue(User.class);
                                     if (userData != null) {
@@ -450,12 +502,14 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
                                         if (userData.email.equals(newEmail)) {
                                             exists = true;
                                             memberID = users.getKey();
+                                            newMember = userData;
                                         }
                                     }
                                 }
                                 if (exists) {
                                     assert memberID != null;
-                                    /*FirebaseDatabase.getInstance().getReference().setValue(currentFridge).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    db.child("fridgeMembers").child(selected_fridge_id).child(memberID).setValue(newMember);
+                                    db.child("myFridges").child(memberID).child(selected_fridge_id).setValue(currentFridge).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if (task.isSuccessful()) {
@@ -465,8 +519,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
 
                                             }
                                         }
-                                    });*/
-                                    Toast.makeText(FridgeSettingsActivity.this, "will add member!", Toast.LENGTH_LONG).show();
+                                    });
                                     dialog.dismiss();
                                 } else {
                                     Toast.makeText(FridgeSettingsActivity.this, "There is no user with that email", Toast.LENGTH_LONG).show();
@@ -496,16 +549,14 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
 
     public void updatePrimaryFridges(String primary_fridge) {
 
-        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        for(Integer i = 0; i < countFridge; i++) {
+        for(Integer i = 0; i < countAllFridge; i++) {
             HashMap<String, Object> changePrimary = new HashMap<>();
             if (fridge_id_list.get(i).equals(primary_fridge)){
                 changePrimary.put("primary", true);
-                FirebaseDatabase.getInstance().getReference().child("fridges").child(fridge_id_list.get(i)).updateChildren(changePrimary);
             } else {
                 changePrimary.put("primary", false);
-                FirebaseDatabase.getInstance().getReference().child("fridges").child(fridge_id_list.get(i)).updateChildren(changePrimary);
             }
+            db.child("myFridges").child(userID).child(fridge_id_list.get(i)).updateChildren(changePrimary);
 
         }
     }
@@ -514,7 +565,29 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
 
         HashMap<String, Object> changeName = new HashMap<>();
         changeName.put("name", newName);
-        FirebaseDatabase.getInstance().getReference().child("fridges").child(fridgeID).updateChildren(changeName);
+        //fetch all members of this fridge
+        memberID = new String();
+        db.child("fridgeMembers").child(fridgeID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if(snapshot.exists() && snapshot != null){
+                    //update fridge for each member
+                    for (DataSnapshot member: snapshot.getChildren()) {
+                        memberID = member.getKey();
+                        db.child("myFridges").child(memberID).child(fridgeID).updateChildren(changeName);
+                    }
+                    //when done, update fridge
+                   db.child("fridges").child(fridgeID).updateChildren(changeName);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("TAG: ", databaseError.getMessage());
+            }
+        });
+
+
     }
 
 
@@ -529,14 +602,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 delete_messages_and_groceries(fridgeID);
-                DatabaseReference mPostReference = FirebaseDatabase.getInstance().getReference()
-                        .child("fridges").child(fridgeID);
-                mPostReference.removeValue();
-                
-                Toast.makeText(FridgeSettingsActivity.this, "Deleted "+fridge_list.get(fridge_order)+" fridge", Toast.LENGTH_LONG).show();
-                Intent intent = getIntent();
-                finish();
-                startActivity(intent);
+                delete_from_users(fridgeID, my_fridge_list.get(fridge_order));
 
             }
         });
@@ -553,9 +619,41 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
 
     }
 
-    private void delete_messages_and_groceries(String fridgeID) {
-        DatabaseReference db = FirebaseDatabase.getInstance().getReference();
+    private void delete_from_users(String fridgeID, String fridgeName) {
+        memberID = new String();
+        db.child("fridgeMembers").child(fridgeID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if(snapshot.exists() && snapshot != null){
+                    for (DataSnapshot member: snapshot.getChildren()) {
+                        memberID = member.getKey();
+                        db.child("myFridges").child(memberID).child(fridgeID).removeValue();
+                    }
+                    db.child("fridgeMembers").child(fridgeID).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            db.child("fridges").child(fridgeID).removeValue();
+                            Toast.makeText(FridgeSettingsActivity.this, "Deleted "+fridgeName+" fridge", Toast.LENGTH_LONG).show();
+                            Intent intent = getIntent();
+                            finish();
+                            startActivity(intent);
+                        }
+                    });
+                }
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("TAG: ", databaseError.getMessage());
+            }
+        });
+
+
+
+
+    }
+
+    private void delete_messages_and_groceries(String fridgeID) {
         ///delete messages
         db.child("messages").orderByChild("fridgeID").equalTo(fridgeID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

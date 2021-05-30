@@ -1,20 +1,18 @@
 package hr.riteh.sl.smartfridge;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -22,11 +20,8 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +29,6 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -45,29 +39,31 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Fridge;
-import hr.riteh.sl.smartfridge.FirebaseDatabase.Grocery;
-import hr.riteh.sl.smartfridge.FirebaseDatabase.Message;
+import hr.riteh.sl.smartfridge.FirebaseDatabase.MyFridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.User;
 
 public class HomeActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
-    String userID;
-    private DatabaseReference db;
+
+    FirebaseUser Fuser = FirebaseAuth.getInstance().getCurrentUser();
+    String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private DatabaseReference db = FirebaseDatabase.getInstance().getReference();
     private Query fridges_query;
 
     private List<String> fridge_list = new ArrayList<String>();
     private List<String> fridge_id_list = new ArrayList<String>();
     private List<String> owner_id_list = new ArrayList<String>();
+
+
     private String fridge_name;
     int selected_fridge = 0;
     private String ownerID;
     long countFridge = 0;
+    long countMyFridge = 0;
 
     ArrayAdapter adapter;
 
@@ -153,8 +149,8 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
         mProgressDialog.setMessage("Loading ...");
         mProgressDialog.show();
-        userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        fridges_query = FirebaseDatabase.getInstance().getReference().child("fridges").orderByChild("ownerID").equalTo(userID);
+
+        fridges_query = db.child("myFridges").child(userID);
 
         fridges_query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -163,9 +159,11 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                     fridge_list.clear();
                     fridge_id_list.clear();
                     owner_id_list.clear();
+                    countMyFridge = 0;
                     // dataSnapshot is the "fridges" node with all children with id userID
                     for (DataSnapshot fridges : snapshot.getChildren()) {
-                        Fridge fridgeData = fridges.getValue(Fridge.class);
+                        MyFridge fridgeData = fridges.getValue(MyFridge.class);
+                        if (fridgeData.ownerID.equals(userID)) countMyFridge++;
                         if (!fridgeData.primary) {
                             fridge_list.add(fridgeData.name);
                             fridge_id_list.add(fridges.getKey());
@@ -189,9 +187,10 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                 Toast.makeText(HomeActivity.this, "Something wrong happened with fridge", Toast.LENGTH_LONG).show();
             }
         });
+
     }
 
-    private void updateFridges(Fridge newFridge, String fridgeKey) {
+    private void updateFridges(MyFridge newFridge, String fridgeKey) {
         mProgressDialog = new ProgressDialog(this);
 
         mProgressDialog.setMessage("Loading ...");
@@ -220,6 +219,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_options, menu);
+
         return true;
     }
 
@@ -227,14 +227,14 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.options_myprofile:
-                Toast.makeText(this, "Will go to myprofile", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Will go to myprofile: "+Fuser.getEmail(), Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.options_fridges:
                 Intent intent = new Intent(HomeActivity.this, FridgeSettingsActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.options_newfridge:
-                if (countFridge >= 3) {
+                if (countMyFridge >= 3) {
                     Toast.makeText(this, "You already have 3 fridges", Toast.LENGTH_SHORT).show();
                 } else {
                     createNewFridge();
@@ -295,7 +295,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         TextView countF = (TextView) customLayout.findViewById(R.id.dialog_countFridge);
         EditText fridgeName = (EditText) customLayout.findViewById(R.id.dialog_fridge_name);
         CheckBox primaryFridge = (CheckBox) customLayout.findViewById(R.id.dialog_defaultFridge);
-        countF.setText((countFridge+1)+". fridge out of 3");
+        countF.setText((countMyFridge+1)+". fridge out of 3");
 
         // add create and cancel buttons
         builder.setPositiveButton(R.string.dialog_create, new DialogInterface.OnClickListener() {
@@ -303,23 +303,27 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
             public void onClick(DialogInterface dialog, int which) {
                 String FName = fridgeName.getText().toString();
                 Boolean primary = primaryFridge.isChecked();
-                String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                Fridge newFridge = new Fridge(FName, ownerID, primary);
-                if (!FName.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null) {
-                    FirebaseDatabase.getInstance().getReference().child("fridges").orderByChild("name").equalTo(FName).addListenerForSingleValueEvent(new ValueEventListener() {
+                Fridge newFridge = new Fridge(FName, userID);
+                MyFridge newMyFridge = new MyFridge(FName, userID, primary);
+                User newUser = new User(Fuser.getDisplayName(), Fuser.getEmail());
+                if (!FName.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null && FName.length() < 25) {
+                    db.child("myFridges").child(userID).orderByChild("name").equalTo(FName).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists()) {
                                 Toast.makeText(HomeActivity.this, "You already have a fridge with this name", Toast.LENGTH_LONG).show();
                             } else {
-                                String key = FirebaseDatabase.getInstance().getReference().child("fridges").push().getKey();
-                                FirebaseDatabase.getInstance().getReference().child("fridges").child(key).setValue(newFridge).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                String key = db.child("fridges").push().getKey();
+                                db.child("fridgeMembers").child(key).child(userID).setValue(newUser);
+                                db.child("myFridges").child(userID).child(key).setValue(newMyFridge);
+                                db.child("fridges").child(key).setValue(newFridge).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
                                             Toast.makeText(HomeActivity.this, "Fridge created!", Toast.LENGTH_LONG).show();
                                             if(primaryFridge.isChecked()) changePrimaryValue(key);
-                                            updateFridges(newFridge, key);
+                                            updateFridges(newMyFridge, key);
+                                            countMyFridge++;
                                             refreshFragment();
                                             // ((MessagesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container)).getFridgeMessages(fridge_id_list.get(selected_fridge));
                                         } else {
@@ -342,6 +346,8 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                         }
                     });
 
+                } else if (FName.length() > 25) {
+                    Toast.makeText(HomeActivity.this, "Name is to long.", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(HomeActivity.this, "You must give a name", Toast.LENGTH_LONG).show();
                 }
@@ -362,9 +368,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public void changePrimaryValue(String key) {
 
-        userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        fridges_query = FirebaseDatabase.getInstance().getReference("fridges").orderByChild("ownerID").equalTo(userID);
+        fridges_query = db.child("myFridges").child(userID);
 
         fridges_query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -373,11 +377,11 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                     // dataSnapshot is the "fridges" node with all children with id userID
 
                     for (DataSnapshot fridges : snapshot.getChildren()) {
-                        Fridge fridgeData = fridges.getValue(Fridge.class);
+                        MyFridge fridgeData = fridges.getValue(MyFridge.class);
                         if (fridgeData.primary && !fridges.getKey().equals(key) ){
                             HashMap<String, Object> changePrimary = new HashMap<>();
                             changePrimary.put("primary", false);
-                            FirebaseDatabase.getInstance().getReference().child("fridges").child(fridges.getKey()).updateChildren(changePrimary);
+                            db.child("myFridges").child(userID).child(fridges.getKey()).updateChildren(changePrimary);
                         }
 
 
@@ -397,7 +401,6 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setMessage("Are you sure you want to log out ").setTitle("Log out");
-        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
         // add create and cancel buttons
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override

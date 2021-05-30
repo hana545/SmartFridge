@@ -23,7 +23,7 @@
         android:id="@+id/textView"
         android:layout_width="217dp"
         android:layout_height="55dp"
-        android:fontFamily="@font/satisfy"
+        android:fontFamily="@font/satisfy_regular"
         android:gravity="center"
         android:letterSpacing="0.1"
         app:layout_constraintHorizontal_bias="0.5"

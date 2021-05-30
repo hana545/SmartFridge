@@ -37,10 +37,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.SimpleTimeZone;
 
-import hr.riteh.sl.smartfridge.FirebaseDatabase.Fridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Grocery;
+import hr.riteh.sl.smartfridge.FirebaseDatabase.MyFridge;
 
 
 public class GroceryActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, GroceryAdaper.OnGroceryListener {
@@ -156,7 +155,7 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
                     for (DataSnapshot groceries : snapshot.getChildren()) {
                         Grocery groceryData = groceries.getValue(Grocery.class);
                         grocery_list_name.add(groceryData.grocery_name);
-                        grocery_list_quantity.add(groceryData.quantity);
+                        grocery_list_quantity.add(String.valueOf(groceryData.quantity));
                         grocery_list_exp_date.add(groceryData.exp_date);
                         grocery_id_list.add(groceries.getKey());
                     }
@@ -194,7 +193,7 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
                     fridge_list.clear();
                     // dataSnapshot is the "fridges" node with all children with id userID
                     for (DataSnapshot fridges : snapshot.getChildren()) {
-                        Fridge fridgeData = fridges.getValue(Fridge.class);
+                        MyFridge fridgeData = fridges.getValue(MyFridge.class);
                         if (!fridgeData.primary) {
                             fridge_list.add(fridgeData.name);
                             fridge_id_list.add(fridges.getKey());
@@ -243,7 +242,7 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
 
     private void createNewGrocery() {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+      /*  AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 
         final View customLayout = getLayoutInflater().inflate(R.layout.dialog_create_grocery, null);
@@ -294,7 +293,7 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
         // create and show the alert dialog
         AlertDialog dialog = builder.create();
         dialog.show();
-
+*/
     }
 
     @Override

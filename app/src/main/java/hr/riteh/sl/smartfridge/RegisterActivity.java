@@ -21,20 +21,19 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Random;
 
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Fridge;
+import hr.riteh.sl.smartfridge.FirebaseDatabase.MyFridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.User;
 
 public class RegisterActivity extends AppCompatActivity {
+
+    DatabaseReference db = FirebaseDatabase.getInstance().getReference();
 
     private EditText name_edittext;
     private EditText email_edittext;
@@ -43,18 +42,22 @@ public class RegisterActivity extends AppCompatActivity {
     private ProgressBar progresBar;
     private TextView btnLogin;
     private FirebaseAuth mAuth;
-    private FirebaseDatabase db;
     private ArrayList<String> fridgenames = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+            startActivity(intent);
+        }
         FirebaseDatabase database = FirebaseDatabase.getInstance();
 
         DatabaseReference db = database.getReference().child("users");
-        User user = new User();
-
+ 
         name_edittext = (EditText)findViewById(R.id.register_username);
         email_edittext = (EditText)findViewById(R.id.register_email);
         password_edittext = (EditText)findViewById(R.id.register_password);
@@ -63,9 +66,19 @@ public class RegisterActivity extends AppCompatActivity {
         progresBar = (ProgressBar)findViewById(R.id.register_progress_bar);
 
         fridgenames.add("Optimistic horse");
+        fridgenames.add("Charming horse");
+        fridgenames.add("Ruthless horse");
         fridgenames.add("Gentle owl");
+        fridgenames.add("Incredible owl");
+        fridgenames.add("Charming owl");
+        fridgenames.add("Gentle giraffe");
         fridgenames.add("Charming giraffe");
-        fridgenames.add("Ruthless mouse");
+        fridgenames.add("Ruthless giraffe");
+        fridgenames.add("Optimistic mouse");
+        fridgenames.add("Incredible mouse");
+        fridgenames.add("Gentle mouse");
+        fridgenames.add("Optimistic rabbit");
+        fridgenames.add("Ruthless rabbit");
         fridgenames.add("Incredible rabbit");
 
         mAuth = FirebaseAuth.getInstance();
@@ -159,13 +172,17 @@ public class RegisterActivity extends AppCompatActivity {
                             //create his first fridge
                             Random rand = new Random();
                             int random_index = rand.nextInt(fridgenames.size());
-                            String Fname = fridgenames.get(random_index);
+                            String fridgeName = fridgenames.get(random_index);
                             String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                            Fridge fridge = new Fridge(Fname, ownerID, true);
-                            FirebaseDatabase.getInstance().getReference().child("fridges").push().setValue(fridge).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            Fridge fridge = new Fridge(fridgeName, ownerID);
+                            MyFridge myfridge = new MyFridge(fridgeName, ownerID, true);
+                            String fridgeKey =  db.child("fridges").push().getKey();
+                            db.child("fridges").child(fridgeKey).setValue(fridge).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
+                                        db.child("fridgeMembers").child(fridgeKey).child(ownerID).setValue(user);
+                                        db.child("myFridges").child(ownerID).child(fridgeKey).setValue(myfridge);
                                         Toast.makeText(RegisterActivity.this, "Fridge created!", Toast.LENGTH_LONG).show();
                                         Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
                                         startActivity(intent);
@@ -194,5 +211,18 @@ public class RegisterActivity extends AppCompatActivity {
             InputMethodManager imm = (InputMethodManager) getSystemService(HomeActivity.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+            startActivity(intent);
+
+        }
+
+        progresBar.setVisibility(View.INVISIBLE);
     }
 }
