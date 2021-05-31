@@ -13,14 +13,15 @@ import java.util.List;
 
 public class GroceryAdaper extends RecyclerView.Adapter<GroceryAdaper.GroceryViewHolder> {
 
-    List<String> name, quantity, exp_date;
+    List<String> name, quantity, unit, exp_date;
     Context context;
     private OnGroceryListener mOnGroceryListener;
 
-    public GroceryAdaper(Context ct, List<String> gr_name, List<String> gr_quantity, List<String> gr_exp_date, OnGroceryListener onGroceryListener){
+    public GroceryAdaper(Context ct, List<String> gr_name, List<String> gr_quantity, List<String> gr_unit, List<String> gr_exp_date, OnGroceryListener onGroceryListener){
         context = ct;
         name = gr_name;
         quantity = gr_quantity;
+        unit = gr_unit;
         exp_date = gr_exp_date;
         this.mOnGroceryListener = onGroceryListener;
     }
@@ -37,6 +38,7 @@ public class GroceryAdaper extends RecyclerView.Adapter<GroceryAdaper.GroceryVie
     public void onBindViewHolder(@NonNull GroceryViewHolder holder, int position) {
         holder.row_name.setText(name.get(position));
         holder.row_quantity.setText(quantity.get(position));
+        holder.row_unit.setText(unit.get(position));
         holder.row_exp_date.setText(exp_date.get(position));
     }
 
@@ -47,12 +49,13 @@ public class GroceryAdaper extends RecyclerView.Adapter<GroceryAdaper.GroceryVie
 
     public class GroceryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        TextView row_name, row_quantity, row_exp_date;
+        TextView row_name, row_quantity, row_unit, row_exp_date;
         OnGroceryListener onGroceryListener;
         public GroceryViewHolder(@NonNull View itemView, OnGroceryListener onGroceryListener) {
             super(itemView);
             row_name = itemView.findViewById(R.id.recycler_grocery_name);
             row_quantity = itemView.findViewById(R.id.recycler_grocery_quantity);
+            row_unit = itemView.findViewById(R.id.recycler_grocery_unit);
             row_exp_date = itemView.findViewById(R.id.recycler_grocery_exp_date);
             this.onGroceryListener = onGroceryListener;
             itemView.setOnClickListener(this);

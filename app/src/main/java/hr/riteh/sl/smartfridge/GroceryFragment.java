@@ -49,11 +49,16 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
 
     GroceryAdaper groceryAdaper;
     RecyclerView recyclerView;
+    ArrayAdapter unitAdapter;
 
     private List<String> grocery_list_name = new ArrayList<String>();
     private List<String> grocery_list_quantity = new ArrayList<String>();
+    private List<String> grocery_list_unit = new ArrayList<String>();
     private List<String> grocery_list_exp_date = new ArrayList<String>();
     private List<String> grocery_id_list = new ArrayList<String>();
+
+    private List<String> unit_list = new ArrayList<String>();
+    private String selected_unit = "";
 
     private String fridgeID;
     private String fridge_name;
@@ -72,6 +77,21 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null){
+            fridgeID = getArguments().getString("fridgeID");
+            fridge_name = getArguments().getString("fridge_name");
+            ownerId = getArguments().getString("ownerID");
+            showGroceries();
+        } else {
+            fridgeID = "null";
+            fridge_name = "null";
+        }
+
+        unit_list.add("kg");
+        unit_list.add("g");
+        unit_list.add("l");
+        unit_list.add("ml");
+        unit_list.add("pieces");
 
     }
 
@@ -82,20 +102,11 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
 
 
         recyclerView = view.findViewById(R.id.recycler_view_grocery);
-        groceryAdaper = new GroceryAdaper(getActivity(), grocery_list_name, grocery_list_quantity, grocery_list_exp_date, this);
+        groceryAdaper = new GroceryAdaper(getActivity(), grocery_list_name, grocery_list_quantity, grocery_list_unit, grocery_list_exp_date, this);
         recyclerView.setAdapter(groceryAdaper);
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
 
 
-        if (getArguments() != null){
-            fridgeID = getArguments().getString("fridgeID");
-            fridge_name = getArguments().getString("fridge_name");
-            ownerId = getArguments().getString("ownerID");
-            showGroceries();
-        } else {
-            fridgeID = "null";
-            fridge_name = "null";
-        }
 
         FloatingActionButton fab = view.findViewById(R.id.grocery_btn_newGrocery);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -117,18 +128,21 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
                 grocery_list_exp_date.clear();
                 grocery_list_name.clear();
                 grocery_list_quantity.clear();
+                grocery_list_unit.clear();
                 grocery_id_list.clear();
                 if (snapshot.exists()) {
                     // dataSnapshot is the "grocery" node with all children with id userID
                     for (DataSnapshot groceries : snapshot.getChildren()) {
                         Grocery groceryData = groceries.getValue(Grocery.class);
                         grocery_list_name.add(groceryData.grocery_name);
-                        grocery_list_quantity.add(groceryData.quantity);
+                        grocery_list_quantity.add(String.valueOf(groceryData.quantity));
+                        grocery_list_unit.add(groceryData.unit);
                         grocery_list_exp_date.add(groceryData.exp_date);
                         grocery_id_list.add(groceries.getKey());
                     }
                     Collections.reverse(grocery_list_name);
                     Collections.reverse(grocery_list_quantity);
+                    Collections.reverse(grocery_list_unit);
                     Collections.reverse(grocery_list_exp_date);
                     Collections.reverse(grocery_id_list);
                     //System.out.println("tu sam");
@@ -154,20 +168,42 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
         builder.setView(customLayout);
         TextView fridge_title = customLayout.findViewById(R.id.fridge_txt);
         fridge_title.setText("Fridge: " + fridge_name);
+
+        Spinner unitSpinner = (Spinner) customLayout.findViewById(R.id.unit_spinner);
+        unitSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view,
+                                       int position, long id) {
+                Object item = adapterView.getItemAtPosition(position);
+                if (item != null) {
+                    selected_unit = item.toString();
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                // TODO Auto-generated method stub
+
+            }
+        });
+        unitAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_spinner_item, unit_list);
+        // Specify the layout to use when the list of choices appears
+        unitAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        unitSpinner.setAdapter(unitAdapter);
+
         EditText edt_grocery_name = (EditText) customLayout.findViewById(R.id.dialog_grocery_grocery_name);
         EditText edt_quantity = (EditText) customLayout.findViewById(R.id.dialog_grocery_quantity);
         EditText edt_exp_date = (EditText) customLayout.findViewById(R.id.dialog_grocery_exp_date);
-
         // add create and cancel buttons
         builder.setPositiveButton(R.string.dialog_create, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String grocery_name = edt_grocery_name.getText().toString();
-                String quantity = edt_quantity.getText().toString();
+                Integer quantity = Integer.parseInt(edt_quantity.getText().toString());
                 String exp_date = edt_exp_date.getText().toString();
                 String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
                 String fridgeId = fridgeID;
-                Grocery msg = new Grocery(ownerID, fridgeId, grocery_name, quantity, exp_date);
+                Grocery msg = new Grocery(ownerID, fridgeId, grocery_name, quantity, selected_unit, exp_date);
 
                 if (!grocery_name.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null) {
                     //username_textview.setText(msg.text);
@@ -175,10 +211,13 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
+                                Log.i("SPINNERUNIT","obavio");
                                 showGroceries();
                                 Toast.makeText(MyApplication.getAppContext(), "Grocery saved!", Toast.LENGTH_LONG).show();
 
                             } else {
+
+                                Log.i("SPINNERUNIT","nece");
                                 Toast.makeText(MyApplication.getAppContext(), "Failed to create grocery! Try again.", Toast.LENGTH_LONG).show();
 
                             }

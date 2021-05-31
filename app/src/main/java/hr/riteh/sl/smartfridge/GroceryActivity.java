@@ -123,7 +123,7 @@ public class GroceryActivity extends AppCompatActivity implements AdapterView.On
 
         getAllFridges();
         recyclerView = findViewById(R.id.recycler_view);
-        groceryAdaper = new GroceryAdaper(this, grocery_list_name, grocery_list_quantity, grocery_list_exp_date, this);
+        groceryAdaper = new GroceryAdaper(this, grocery_list_name, grocery_list_quantity, grocery_list_quantity, grocery_list_exp_date, this);
         recyclerView.setAdapter(groceryAdaper);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 

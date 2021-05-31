@@ -46,6 +46,8 @@ import hr.riteh.sl.smartfridge.FirebaseDatabase.User;
 public class FridgeSettingsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     ArrayAdapter adapter;
+    Spinner spinner;
+
     FirebaseUser Fuser = FirebaseAuth.getInstance().getCurrentUser();
     String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
     DatabaseReference db = FirebaseDatabase.getInstance().getReference();
@@ -97,7 +99,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
 
         getAllFridges();
         //change fridge
-        Spinner spinner = (Spinner) findViewById(R.id.settings_fridge_spinner);
+        spinner = (Spinner) findViewById(R.id.settings_fridge_spinner);
         spinner.setOnItemSelectedListener(this);
         // Create an ArrayAdapter using the string array and a default spinner layout
         adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, fridge_list);
@@ -322,6 +324,8 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
         }
         checkFridges();
         adapter.notifyDataSetChanged();
+        spinner.setSelection(0);
+        Log.i("SPINNERUNIT", "info: "+spinner.getSelectedItem());
 
         //check delete buttons
         if(btn_del_fridge1.isEnabled()) {

@@ -21,13 +21,25 @@
         android:layout_below="@id/recycler_grocery_name"
         android:textSize="16sp">
     </TextView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:padding="10dp"
+        android:layout_height="50dp"
+        android:id="@+id/recycler_grocery_unit"
+        android:layout_below="@id/recycler_grocery_name"
+        android:layout_toRightOf="@id/recycler_grocery_quantity"
+        android:layout_marginLeft="10dp"
+        android:textSize="16sp">
+    </TextView>
+
     <TextView
         android:layout_width="wrap_content"
         android:padding="10dp"
         android:layout_height="50dp"
         android:id="@+id/recycler_grocery_exp_date"
         android:layout_below="@id/recycler_grocery_name"
-        android:layout_toRightOf="@id/recycler_grocery_quantity"
+        android:layout_toRightOf="@id/recycler_grocery_unit"
         android:layout_marginLeft="50dp"
         android:textSize="16sp">
     </TextView>
