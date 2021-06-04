@@ -30,6 +30,7 @@ import hr.riteh.sl.smartfridge.FirebaseDatabase.Store;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    Fragment active;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +98,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             if (task.isSuccessful()) {
                                 /*StoresFragment mStoresFragment = new StoresFragment();
                                 FragmentManager ft = getSupportFragmentManager();
-                                ft.beginTransaction().replace(R.id.fragment_container, mStoresFragment).addToBackStack(null).commit();*/
+                                ft.beginTransaction().replace(R.id.fragment_container, mStoresFragment).commit();
+                                active =  mStoresFragment;*/
                             } else {
                                 System.out.println("Error");
                             }

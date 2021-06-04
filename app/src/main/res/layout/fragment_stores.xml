@@ -8,7 +8,7 @@
     android:background="@drawable/gradient_white_blue">
 
 
-    <TextView
+    <!--<TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Stores near me"
@@ -18,6 +18,24 @@
         android:textSize="50sp"
         android:layout_centerInParent="true"
         />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_stores"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="0dp"
+        android:layout_marginTop="0dp"
+        >
+    </androidx.recyclerview.widget.RecyclerView>-->
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MapsActivity" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/stores_btn_newStore"

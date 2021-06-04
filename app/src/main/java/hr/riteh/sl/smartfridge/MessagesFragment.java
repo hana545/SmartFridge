@@ -49,7 +49,7 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
     private static RecyclerView recyclerView;
 
     private static Query mess_query;
-    private DatabaseReference db =  FirebaseDatabase.getInstance().getReference();;
+    private DatabaseReference db =  FirebaseDatabase.getInstance().getReference();
 
     private static List<String> messages_list_text = new ArrayList<String>();
     private static List<String> messages_list_author= new ArrayList<String>();
