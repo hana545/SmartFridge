@@ -43,8 +43,8 @@
         android:text="Delete"
         android:id="@+id/store_delete"
         android:layout_below="@id/dialog_edit_store_name"
-        android:layout_marginTop="30dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="40dp"
         android:backgroundTint="#ff8080"/>
 
 

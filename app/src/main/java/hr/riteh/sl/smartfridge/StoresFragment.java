@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -112,9 +113,9 @@ public class StoresFragment extends Fragment  {
                         MarkerOptions marker = new MarkerOptions();
                         marker.position(latLng);
                         marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-                        gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
-                        gMap.addMarker(marker);
-                        createNewStore(latLng);
+                        gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 5));
+                        mark = gMap.addMarker(marker);
+                        createNewStore(latLng, mark);
                     }
                 });
 
@@ -202,13 +203,23 @@ public class StoresFragment extends Fragment  {
         handler.postDelayed(new Runnable() {
             public void run() {
                 dialog.show();
+                Button deleteStoreBtn = dialog.findViewById(R.id.store_delete);
+
+                deleteStoreBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        System.out.println("stisnut delete");
+                        deleteStore(marker);
+                        dialog.dismiss();
+                    }
+                });
             }
         }, 1000);  // 1500 seconds
 
 
     }
 
-    private void createNewStore(LatLng latLng) {
+    private void createNewStore(LatLng latLng, Marker marker) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
 
@@ -245,6 +256,7 @@ public class StoresFragment extends Fragment  {
         builder.setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                marker.remove();
                 dialog.dismiss();
             }
         });
@@ -257,6 +269,28 @@ public class StoresFragment extends Fragment  {
                 dialog.show();
             }
         }, 1000);  // 1500 seconds
+
+    }
+
+    public void deleteStore(Marker marker){
+        System.out.println(marker.getTag().toString());
+        store_query = db.child("stores").child(marker.getTag().toString());
+        store_query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for (DataSnapshot store: snapshot.getChildren()) {
+                    store.getRef().removeValue();
+                    marker.remove();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+
+
+        });
 
     }
 
