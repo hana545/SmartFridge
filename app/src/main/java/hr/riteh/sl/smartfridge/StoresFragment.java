@@ -1,11 +1,16 @@
 package hr.riteh.sl.smartfridge;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,6 +22,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -51,7 +58,8 @@ public class StoresFragment extends Fragment  {
     private static RecyclerView recyclerView;
     private static Query store_query;
     private DatabaseReference db = FirebaseDatabase.getInstance().getReference();
-
+    private GeofencingClient geofencingClient;
+    private int FINE_LOCATION_ACCESS_REQUEST_CODE = 10001;
 
     private static StoreAdapter storeAdapter;
     private static List<String> stores_name_text = new ArrayList<String>();
@@ -72,6 +80,7 @@ public class StoresFragment extends Fragment  {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_stores, container, false);
+        geofencingClient = LocationServices.getGeofencingClient(this.getContext());
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
@@ -82,6 +91,8 @@ public class StoresFragment extends Fragment  {
 
                 LatLng sydney = new LatLng(45, 14.00);
                 gMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+
+
 
                 store_query = db.child("stores").orderByChild("userID").equalTo(FirebaseAuth.getInstance().getCurrentUser().getUid());
                 store_query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -106,6 +117,7 @@ public class StoresFragment extends Fragment  {
                     }
                 });
 
+                enableUserLocation();
 
                 gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                     @Override
@@ -153,6 +165,30 @@ public class StoresFragment extends Fragment  {
         return view;
     }
 
+
+    private void enableUserLocation(){
+        if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            gMap.setMyLocationEnabled(true);
+        } else {
+            if (shouldShowRequestPermissionRationale( Manifest.permission.ACCESS_FINE_LOCATION)) {
+                requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_ACCESS_REQUEST_CODE);
+            } else {
+                requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_ACCESS_REQUEST_CODE);
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == FINE_LOCATION_ACCESS_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                gMap.setMyLocationEnabled(true);
+            } else {
+
+            }
+        }
+    }
 
     private void editStore(Marker marker){
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
