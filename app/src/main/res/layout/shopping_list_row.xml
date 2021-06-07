@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/grocery_row_border">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:padding="8dp"
+        android:layout_height="50dp"
+        android:id="@+id/recycler_grocery_name"
+        android:textSize="22sp">
+    </TextView>
+    <TextView
+        android:layout_width="wrap_content"
+        android:padding="5dp"
+        android:layout_height="50dp"
+        android:id="@+id/recycler_grocery_quantity"
+        android:layout_below="@id/recycler_grocery_name"
+        android:textSize="16sp">
+    </TextView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:padding="5dp"
+        android:layout_height="50dp"
+        android:id="@+id/recycler_grocery_unit"
+        android:layout_below="@id/recycler_grocery_name"
+        android:layout_toRightOf="@id/recycler_grocery_quantity"
+        android:layout_marginLeft="10dp"
+        android:textSize="16sp">
+    </TextView>
+
+    <ImageButton
+    android:id="@+id/recycler_imageButton_checked"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:srcCompat="@drawable/ic_baseline_task_alt_24"
+    android:backgroundTint="@color/dark_tirkiz"
+    android:tint="@color/white"
+    android:layout_alignParentRight="true"
+    tools:ignore="VectorDrawableCompat"
+    android:layout_alignParentTop="true"/>
+    <ImageButton
+        android:id="@+id/recycler_imageButton_remove"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_baseline_remove_shopping_cart_24"
+        android:backgroundTint="#E9802222"
+        android:tint="@color/white"
+        android:layout_alignParentRight="true"
+        tools:ignore="VectorDrawableCompat"
+        android:layout_below="@+id/recycler_imageButton_checked"/>
+
+
+
+
+</RelativeLayout>

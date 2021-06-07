@@ -2,10 +2,21 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_white_blue"
     >
+    <ImageButton
+        android:id="@+id/imageButton_shopping_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_baseline_shopping_cart_24"
+        android:backgroundTint="@color/dark_tirkiz"
+        android:tint="@color/white"
+        tools:ignore="VectorDrawableCompat"
+        android:layout_alignParentTop="true"/>
+
 
     <TextView
         android:id="@+id/text_no_groceries"
@@ -16,15 +27,14 @@
         android:textSize="22sp"
         android:layout_centerHorizontal="true"
         app:layout_constraintHorizontal_bias="0.5"
-        android:visibility="visible"
+        android:visibility="invisible"
         />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_grocery"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="0dp"
-        android:layout_marginTop="0dp"
+        android:layout_below="@+id/imageButton_shopping_list"
         >
 
     </androidx.recyclerview.widget.RecyclerView>

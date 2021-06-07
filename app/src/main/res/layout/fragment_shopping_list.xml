@@ -2,33 +2,47 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_white_blue"
-    >
+    tools:context=".ShoppingListFragment">
+
     <TextView
-        android:id="@+id/text_no_messages"
+    android:id="@+id/shopping_list_title"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Shopping list"
+    android:textSize="20sp"
+    android:textAlignment="center"
+    android:padding="8dp"
+    android:fontFamily="@font/architectsdaughter_regular"
+    android:gravity="center_horizontal" />
+    <TextView
+        android:id="@+id/text_no_groceries"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:text="You dont have any messages"
+        android:text="You dont need to buy any groceries"
         android:gravity="center_vertical"
         android:textSize="22sp"
         android:layout_centerHorizontal="true"
         app:layout_constraintHorizontal_bias="0.5"
-        android:visibility="invisible"
+        android:visibility="visible"
         />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_messages"
+        android:id="@+id/recycler_view_grocery"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/shopping_list_title"
         android:layout_marginBottom="0dp"
         android:layout_marginTop="0dp"
         >
+
     </androidx.recyclerview.widget.RecyclerView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/home_btn_newMessage"
+        android:id="@+id/grocery_sh_btn_newGrocery"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
@@ -36,6 +50,10 @@
         android:layout_marginBottom="30dp"
         android:layout_alignParentRight="true"
         android:layout_marginRight="40dp"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        app:srcCompat="@drawable/ic_baseline_add_shopping_cart_24"
+        tools:ignore="VectorDrawableCompat" />
+
+
+
 
 </RelativeLayout>

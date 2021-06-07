@@ -75,6 +75,8 @@ public class GroceryItemFragment extends Fragment {
             fridgeID = "";
             fridge_name = "";
         }
+        Spinner fridge_spinner = (Spinner) getActivity().findViewById(R.id.fridge_spinner);
+        fridge_spinner.setEnabled(false);
 
         unit_list.add("kg");
         unit_list.add("g");
