@@ -205,6 +205,8 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
 
 
         TextView textMessage = (TextView) view.findViewById(R.id.dialog_show_message_text);
+        TextView titleMessage = (TextView) view.findViewById(R.id.dialog_show_message_title);
+        titleMessage.setText(messages_list_author.get(position)+" said: ");
         Button btn_deleteMessage = (Button) view.findViewById(R.id.dialog_delete_message);
 
         mess_query = db.child("messages").child(messageID);
@@ -214,7 +216,7 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
                 Message messData = snapshot.getValue(Message.class);
                 if (messData != null){
                     textMessage.setText(messData.text);
-                    if (authorID.equals(userId)){
+                    if (authorID.equals(userId) || ownerId.equals(userId)){
                         btn_deleteMessage.setVisibility(View.VISIBLE);
                         btn_deleteMessage.setOnClickListener(new View.OnClickListener(){
                             @Override

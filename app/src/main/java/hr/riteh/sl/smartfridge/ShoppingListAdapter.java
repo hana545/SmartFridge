@@ -39,7 +39,7 @@ import hr.riteh.sl.smartfridge.FirebaseDatabase.Message;
 public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.GroceryViewHolder> {
 
     List<String> id, name, quantity, unit;
-    String fridgeID, currentID;
+    String fridgeID;
     Context context;
 
     private List<String> unit_list = new ArrayList<String>();
@@ -95,6 +95,8 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             row_bought.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
+                    Log.i("FRIDGEMEMBERS", "position: "+position);
                     addGrocery(id.get(position), name.get(position), quantity.get(position), unit.get(position));
                 }
             });

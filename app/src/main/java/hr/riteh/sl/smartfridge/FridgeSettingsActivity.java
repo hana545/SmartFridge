@@ -3,6 +3,8 @@ package hr.riteh.sl.smartfridge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -43,7 +45,7 @@ import hr.riteh.sl.smartfridge.FirebaseDatabase.Fridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.MyFridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.User;
 
-public class FridgeSettingsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class FridgeSettingsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, FridgeMembersAdapter.OnMemberListener {
 
     ArrayAdapter adapter;
     Spinner spinner;
@@ -87,9 +89,6 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fridge_settings);
-
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM); //bellow setSupportActionBar(toolbar);
-        getSupportActionBar().setCustomView(R.layout.titlebar);
 
         ActionBar actionBar = getSupportActionBar();
 
@@ -379,6 +378,31 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
                 }
             });
         }
+        if(btn_people_fridge1.isEnabled()) {
+            btn_people_fridge1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showMembers(my_fridge_id_list.get(0), my_fridge_list.get(0));
+                }
+            });
+        }
+        if(btn_people_fridge2.isEnabled()) {
+            btn_people_fridge2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showMembers(my_fridge_id_list.get(1), my_fridge_list.get(1));
+                }
+            });
+        }
+
+        if(btn_people_fridge3.isEnabled()) {
+            btn_people_fridge3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showMembers(my_fridge_id_list.get(2), my_fridge_list.get(2));
+                }
+            });
+        }
 
         if(btn_new_fridge.isEnabled()) {
             btn_new_fridge.setOnClickListener(new View.OnClickListener() {
@@ -551,6 +575,60 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
 
     }
 
+    private void showMembers(String selected_fridge_id, String fridge_name) {
+
+        String userEmail = Fuser.getEmail();
+
+
+        List<String> member_name_list = new ArrayList<String>();
+        List<String> member_email_list = new ArrayList<String>();
+        List<String> member_id_list = new ArrayList<String>();
+
+        Dialog dialog = new Dialog(this);
+        dialog.setCancelable(true);
+
+        View view  = getLayoutInflater().inflate(R.layout.dialog_show_fridge_members, null);
+        dialog.setContentView(view);
+
+        TextView title = view.findViewById(R.id.dialog_show_members_title);
+        title.setText("Members of "+fridge_name);
+
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view_members);
+        FridgeMembersAdapter membersAdapter = new FridgeMembersAdapter(MyApplication.getAppContext(), selected_fridge_id, userID, member_id_list, member_name_list, member_email_list);
+        recyclerView.setAdapter(membersAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+
+        db.child("fridgeMembers").child(selected_fridge_id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    member_name_list.clear();
+                    member_email_list.clear();
+                    member_id_list.clear();
+                    for (DataSnapshot users : snapshot.getChildren()) {
+                        User userData = users.getValue(User.class);
+                        member_name_list.add(0, userData.name);
+                        member_email_list.add(userData.email);
+                        member_id_list.add(0, users.getKey());
+
+                        membersAdapter.notifyDataSetChanged();
+                    }
+
+                } else {
+                    Toast.makeText(FridgeSettingsActivity.this, "There is no members", Toast.LENGTH_LONG).show();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(FridgeSettingsActivity.this, "Something wrong happened with fridge", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        dialog.show();
+
+
+    }
+
     public void updatePrimaryFridges(String primary_fridge) {
 
         for(Integer i = 0; i < countAllFridge; i++) {
@@ -697,4 +775,8 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
 
     }
 
+    @Override
+    public void onMemberClick(int position) {
+
+    }
 }

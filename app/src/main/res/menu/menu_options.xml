@@ -10,6 +10,12 @@
 
         />
     <item
+        android:title="See all fridges"
+        android:id="@+id/options_see_all_fridges"
+        app:showAsAction="never"
+
+        />
+    <item
         android:title="Manage fridges"
         android:id="@+id/options_fridges"
         app:showAsAction="never"

@@ -230,12 +230,17 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
         switch (item.getItemId()) {
             case R.id.options_myprofile:
                 Toast.makeText(this, "Will go to myprofile: "+Fuser.getEmail(), Toast.LENGTH_SHORT).show();
                 return true;
+            case R.id.options_see_all_fridges:
+                intent = new Intent(HomeActivity.this, SeeAllFridgesActivity.class);
+                startActivity(intent);
+                return true;
             case R.id.options_fridges:
-                Intent intent = new Intent(HomeActivity.this, FridgeSettingsActivity.class);
+                intent = new Intent(HomeActivity.this, FridgeSettingsActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.options_newfridge:
