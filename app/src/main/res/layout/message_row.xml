@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:padding="10dp"
     android:background="@drawable/grocery_row_border">
 
     <TextView
         android:layout_width="match_parent"
-        android:padding="10dp"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:id="@+id/recycler_message_text"
         android:fontFamily="@font/architectsdaughter_regular"
         android:textSize="17sp">
@@ -17,12 +18,11 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:padding="10dp"
-        android:layout_height="50dp"
+        android:layout_height="20dp"
         android:id="@+id/recycler_message_author"
         android:layout_below="@id/recycler_message_text"
         android:fontFamily="@font/architectsdaughter_regular"
-        android:layout_marginLeft="50dp"
+        android:layout_marginLeft="30dp"
         android:textSize="14sp">
     </TextView>
 

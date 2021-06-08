@@ -1,5 +1,7 @@
 package hr.riteh.sl.smartfridge;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -14,7 +16,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -45,7 +49,6 @@ public class GroceryItemFragment extends Fragment {
     private DatabaseReference db = FirebaseDatabase.getInstance().getReference();
     private Query grocery_query;
     private String grocery_name;
-    private String grocery_quantity;
     private String grocery_unit;
     private String grocery_exp_date;
 
@@ -54,8 +57,8 @@ public class GroceryItemFragment extends Fragment {
     private String fridge_name;
 
     EditText editName;
-    EditText editQuantity;
-    EditText edit_exp_date;
+    DatePicker datepicker;
+    NumberPicker numpicker;
 
     public GroceryItemFragment() {
         // Required empty public constructor
@@ -138,8 +141,6 @@ public class GroceryItemFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 deleteGrocery();
-                ft.beginTransaction().replace(R.id.fragment_container, mGroceryFragment).addToBackStack(null).commit();
-
             }
         });
 
@@ -149,8 +150,11 @@ public class GroceryItemFragment extends Fragment {
 
     private void fillGroceryData(){
         editName = view.findViewById(R.id.grocery_item_name);
-        editQuantity = view.findViewById(R.id.grocery_item_quantity);
-        edit_exp_date = view.findViewById(R.id.grocery_item_exp_date);
+        numpicker = (NumberPicker) view.findViewById(R.id.grocery_item_quantity_numpicker);
+        numpicker.setMaxValue(1000);
+        numpicker.setMinValue(1);
+        datepicker = view.findViewById(R.id.grocery_exp_date_datepicker);
+        datepicker.setMinDate(System.currentTimeMillis() - 1000);
         //System.out.println(grocery_id);
         grocery_query = db.child("grocery").child(grocery_id);
         grocery_query.addValueEventListener(new ValueEventListener() {
@@ -159,13 +163,17 @@ public class GroceryItemFragment extends Fragment {
                 Grocery groceryData = snapshot.getValue(Grocery.class);
                 if(groceryData != null) {
                     grocery_name = groceryData.grocery_name;
-                    grocery_quantity = String.valueOf(groceryData.quantity);
                     grocery_unit = groceryData.unit;
                     grocery_exp_date = groceryData.exp_date;
+                    String[] date_parts = grocery_exp_date.split("-");
+                    Integer day = Integer.valueOf(date_parts[0]);
+                    Integer month = Integer.valueOf(date_parts[1]);
+                    Integer year = Integer.valueOf(date_parts[2]);
+                    datepicker.updateDate(year, month, day);
+                    numpicker.setValue(Integer.valueOf(groceryData.quantity));
+
 
                     editName.setText(grocery_name);
-                    editQuantity.setText(grocery_quantity);
-                    edit_exp_date.setText(grocery_exp_date);
                     unitSpinner.setSelection(unit_list.indexOf(grocery_unit));
 
                 }
@@ -180,8 +188,9 @@ public class GroceryItemFragment extends Fragment {
 
     public void editGrocery() {
         editName = view.findViewById(R.id.grocery_item_name);
-        editQuantity = view.findViewById(R.id.grocery_item_quantity);
-        edit_exp_date = view.findViewById(R.id.grocery_item_exp_date);
+        numpicker = (NumberPicker) view.findViewById(R.id.grocery_item_quantity_numpicker);
+        datepicker = view.findViewById(R.id.grocery_exp_date_datepicker);
+        datepicker.setMinDate(System.currentTimeMillis() - 1000);
         grocery_query = db.child("grocery").child(grocery_id);
         grocery_query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -191,9 +200,9 @@ public class GroceryItemFragment extends Fragment {
                     groceryValues.put(snap.getKey(), snap.getValue());
                 }
                 groceryValues.put("grocery_name", editName.getText().toString());
-                groceryValues.put("quantity", Integer.parseInt(editQuantity.getText().toString()));
+                groceryValues.put("quantity", numpicker.getValue());
                 groceryValues.put("unit", selected_unit);
-                groceryValues.put("exp_date", edit_exp_date.getText().toString());
+                groceryValues.put("exp_date",  getDateFromDatePicker(datepicker));
                 db.child("grocery").child(grocery_id).updateChildren(groceryValues);
             }
 
@@ -205,24 +214,48 @@ public class GroceryItemFragment extends Fragment {
 
         });
     }
+    /**
+     *
+     * @param datePicker
+     * @return a java.util.Date
+     */
+    public static String getDateFromDatePicker(DatePicker datePicker){
+        int day = datePicker.getDayOfMonth();
+        int month = datePicker.getMonth()+1;
+        int year =  datePicker.getYear();
+        String dateString = day+"-"+month+"-"+year;
+        return dateString;
+    }
 
     public void deleteGrocery(){
-        grocery_query = db.child("grocery").child(grocery_id);
-        grocery_query.addListenerForSingleValueEvent(new ValueEventListener() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        builder.setMessage("Are you sure you want to delete "+grocery_name).setTitle("Delete grocery");
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                for (DataSnapshot grocery: snapshot.getChildren()) {
-                    grocery.getRef().removeValue();
-                }
+            public void onClick(DialogInterface dialog, int which) {
+                db.child("grocery").child(grocery_id).removeValue();
+                Fragment mGroceryFragment = new GroceryFragment();
+                mGroceryFragment.setArguments(getArguments());
+                FragmentManager ft = getFragmentManager();
+                ft.beginTransaction().replace(R.id.fragment_container, mGroceryFragment).addToBackStack(null).commit();
+                Toast.makeText(MyApplication.getAppContext(), "Grocery deleted", Toast.LENGTH_LONG).show();
+
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-
 
         });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
 
     }
+
+
 }

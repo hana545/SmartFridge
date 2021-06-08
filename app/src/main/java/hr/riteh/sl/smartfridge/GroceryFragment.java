@@ -3,9 +3,11 @@ package hr.riteh.sl.smartfridge;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -18,8 +20,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,8 +39,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Grocery;
@@ -94,6 +104,7 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
         view = inflater.inflate(R.layout.fragment_grocery, container, false);
         Spinner fridge_spinner = (Spinner) getActivity().findViewById(R.id.fridge_spinner);
         fridge_spinner.setEnabled(true);
+
         if (getArguments() != null){
             fridgeID = getArguments().getString("fridgeID");
             fridge_name = getArguments().getString("fridge_name");
@@ -113,6 +124,7 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
 
         FloatingActionButton fab = view.findViewById(R.id.grocery_btn_newGrocery);
         fab.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View view) {
                 createNewGrocery();
@@ -125,6 +137,7 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
                 // Create new fragment and transaction
                 Fragment mGroceryShoppingList = new ShoppingListFragment();
 
+                //((HomeActivity) getActivity()).active = mGroceryShoppingList;
                 //set parametar
                 Bundle args = new Bundle();
                 args.putString("fridgeID", fridgeID);
@@ -179,6 +192,7 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void createNewGrocery() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -210,16 +224,23 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
         // Apply the adapter to the spinner
         unitSpinner.setAdapter(unitAdapter);
 
-        EditText edt_grocery_name = (EditText) customLayout.findViewById(R.id.dialog_grocery_grocery_name);
-        EditText edt_quantity = (EditText) customLayout.findViewById(R.id.dialog_grocery_quantity);
-        EditText edt_exp_date = (EditText) customLayout.findViewById(R.id.dialog_grocery_exp_date);
-        // add create and cancel buttons
+        EditText edt_grocery_name = (EditText) customLayout.findViewById(R.id.dialog_grocery_name);
+       //for quantity
+        NumberPicker numpicker = (NumberPicker) customLayout.findViewById(R.id.dialog_grocery_quantity_numpicker);
+        numpicker.setMaxValue(1000);
+        numpicker.setMinValue(1);
+        //for exp date
+        DatePicker datepicker = (DatePicker) customLayout.findViewById(R.id.dialog_grocery_exp_date_datepicker);
+        datepicker.setMinDate(System.currentTimeMillis() - 1000);
+
+         // add create and cancel buttons
         builder.setPositiveButton(R.string.dialog_create, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                numpicker.clearFocus();
                 String grocery_name = edt_grocery_name.getText().toString();
-                Integer quantity = Integer.parseInt(edt_quantity.getText().toString());
-                String exp_date = edt_exp_date.getText().toString();
+                Integer quantity = numpicker.getValue();
+                String exp_date = getDateFromDatePicker(datepicker);
                 String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
                 String fridgeId = fridgeID;
                 Grocery msg = new Grocery(ownerID, fridgeId, grocery_name, quantity, selected_unit, exp_date);
@@ -259,12 +280,23 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
         dialog.show();
 
     }
+    /**
+     *
+     * @param datePicker
+     * @return a java.util.Date
+     */
+    public static String getDateFromDatePicker(DatePicker datePicker){
+         int day = datePicker.getDayOfMonth();
+        int month = datePicker.getMonth()+1;
+        int year =  datePicker.getYear();
+        String dateString = day+"-"+month+"-"+year;
+        return dateString;
+    }
 
     @Override
     public void onGroceryClick(int position) {
         // Create new fragment and transaction
         Fragment mGroceryItemFragment = new GroceryItemFragment();
-
         //set parametar
         Bundle args = new Bundle();
         args.putString("selected_grocery", grocery_id_list.get(position));

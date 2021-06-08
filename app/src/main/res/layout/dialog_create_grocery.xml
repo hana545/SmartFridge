@@ -16,20 +16,21 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="10dp"
+        android:textSize="18sp"
         android:layout_marginLeft="4dp"
         android:textStyle="italic"
         android:id="@+id/fridge_txt">
     </TextView>
 
     <EditText
-        android:id="@+id/dialog_grocery_grocery_name"
+        android:id="@+id/dialog_grocery_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
-        android:layout_marginBottom="4dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="20dp"
         android:hint="Grocery name"
         android:ems="10"
         android:gravity="start|top"
@@ -37,58 +38,102 @@
         android:textColor="@color/black"
         android:layout_below="@id/fridge_txt"/>
 
-    <EditText
+    <TextView
         android:id="@+id/dialog_grocery_quantity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/dialog_grocery_grocery_name"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="4dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginLeft="10dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
-        android:inputType="number"
-        android:hint="Quantity"
-        android:padding="10dp"
+        android:layout_below="@+id/dialog_grocery_name"
+        android:text="Quantity:"
+        android:textSize="15sp"
+        android:textStyle="italic"
         android:ems="10"
         android:gravity="start|top"
-        android:textColor="@color/black"
+        android:textColor="@color/black"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:weightSum="100"
+        android:id="@+id/linear_layout"
+        android:layout_below="@+id/dialog_grocery_quantity">
+
+       <NumberPicker
+            android:id="@+id/dialog_grocery_quantity_numpicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="20"
+            android:layout_below="@+id/dialog_grocery_name"
+           android:scaleX="0.9"
+           android:scaleY="0.9"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
+            android:gravity="start|top"
         />
 
-    <Spinner
-        android:id="@+id/unit_spinner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/dialog_grocery_grocery_name"
-        android:layout_toRightOf="@+id/dialog_grocery_quantity"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="4dp"
-        android:padding="10dp"
-        android:ems="10"
-        android:spinnerMode="dropdown"
-        android:textColor = "#FFFFFF"
-        style="@style/Widget.AppCompat.DropDownItem.Spinner"
+        <Spinner
+            android:id="@+id/unit_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="30"
+            android:layout_below="@id/grocery_item_name"
+            android:layout_toRightOf="@+id/grocery_item_quantity"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="40dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
+            android:gravity="center_vertical"
+            android:padding="10dp"
+            android:ems="10"
+            android:spinnerMode="dropdown"
+            android:textColor = "#FFFFFF"
+            style="@style/Theme.SmartFridge.Spinner"
+            />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/linear_layout"
+        android:layout_marginTop="5dp"
+        android:background="@color/tirkiz"
         />
-
-
-
-    <EditText
+    <TextView
         android:id="@+id/dialog_grocery_exp_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/dialog_grocery_quantity"
+        android:layout_below="@id/linear_layout"
+        android:layout_marginTop="12dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:text="Expiration date:"
+        android:textSize="15sp"
+        android:textStyle="italic"
+        android:ems="10"
+        android:gravity="start|top"
+        android:textColor="@color/black"
+        />
+
+    <DatePicker
+        android:id="@+id/dialog_grocery_exp_date_datepicker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:calendarViewShown="false"
+        android:datePickerMode="spinner"
+        android:layout_below="@id/linear_layout"
         android:layout_marginTop="10dp"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
-        android:hint="Exp. date"
-        android:ems="10"
-        android:gravity="start|top"
-        android:inputType="textMultiLine"
-        android:textColor="@color/black"
         />
+
 
 
 </RelativeLayout>

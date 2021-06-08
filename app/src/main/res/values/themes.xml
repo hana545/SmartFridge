@@ -15,8 +15,9 @@
         <!-- Customize your theme here. -->
 
 </style>
-
-
+    <style name="Theme.SmartFridge.Spinner" parent="Widget.AppCompat.DropDownItem.Spinner">
+        <item name="android:background">@drawable/gradient_spinner</item>">
+    </style>
 
     <style name="Theme.SmartFridge.NoActionBar">
         <item name="windowActionBar">false</item>

@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,7 +51,6 @@ public class ShoppingListFragment extends Fragment implements ShoppingListAdapte
     private List<String> grocery_list_name = new ArrayList<String>();
     private List<String> grocery_list_quantity = new ArrayList<String>();
     private List<String> grocery_list_unit = new ArrayList<String>();
-    private List<String> grocery_list_exp_date = new ArrayList<String>();
     private List<String> grocery_id_list = new ArrayList<String>();
 
     private List<String> unit_list = new ArrayList<String>();
@@ -184,14 +184,17 @@ public class ShoppingListFragment extends Fragment implements ShoppingListAdapte
         // Apply the adapter to the spinner
         unitSpinner.setAdapter(unitAdapter);
 
-        EditText edt_grocery_name = (EditText) customLayout.findViewById(R.id.dialog_grocery_grocery_name);
-        EditText edt_quantity = (EditText) customLayout.findViewById(R.id.dialog_grocery_quantity);
+        EditText edt_grocery_name = (EditText) customLayout.findViewById(R.id.dialog_grocery_name);
+        NumberPicker numpicker = (NumberPicker) customLayout.findViewById(R.id.dialog_grocery_quantity_numpicker);
+        numpicker.setMaxValue(1000);
+        numpicker.setMinValue(1);
         // add create and cancel buttons
         builder.setPositiveButton(R.string.dialog_create, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                numpicker.clearFocus();
                 String grocery_name = edt_grocery_name.getText().toString();
-                Integer quantity = Integer.parseInt(edt_quantity.getText().toString());
+                Integer quantity =  numpicker.getValue();
                 String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
                 String fridgeId = fridgeID;
                 GrocerySH msg = new GrocerySH(ownerID, grocery_name, quantity, selected_unit);

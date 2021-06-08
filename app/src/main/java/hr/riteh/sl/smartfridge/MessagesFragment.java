@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -76,7 +77,9 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view_messages);
         messageAdapter = new MessageAdapter(getActivity(), messages_list_text, messages_list_author,this);
         recyclerView.setAdapter(messageAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        recyclerView.setLayoutManager(new GridLayoutManager(view.getContext(), 3));
+        ItemOffsetDecoration itemDecoration = new ItemOffsetDecoration(view.getContext(), R.dimen.item_offset);
+        recyclerView.addItemDecoration(itemDecoration);
 
         if (getArguments() != null){
             fridgeID = getArguments().getString("fridgeID");

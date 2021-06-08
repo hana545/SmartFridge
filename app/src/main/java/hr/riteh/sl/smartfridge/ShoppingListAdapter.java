@@ -11,8 +11,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -95,9 +97,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             row_bought.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-                    Log.i("FRIDGEMEMBERS", "position: "+position);
-                    addGrocery(id.get(position), name.get(position), quantity.get(position), unit.get(position));
+                    addGrocery(id.get(position), name.get(position), Integer.parseInt(quantity.get(position)), unit.get(position));
                 }
             });
             row_remove.setOnClickListener(new View.OnClickListener() {
@@ -157,7 +157,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     }
 
 
-    public void addGrocery(String groceryId, String groceryName, String groceryQuantity, String groceryUnit){
+    public void addGrocery(String groceryId, String groceryName, Integer groceryQuantity, String groceryUnit){
 
         unit_list.add("kg");
         unit_list.add("g");
@@ -197,22 +197,30 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         unitSpinner.setAdapter(unitAdapter);
         unitSpinner.setSelection(unit_list.indexOf(groceryUnit));
 
-        EditText edt_grocery_name = (EditText) view.findViewById(R.id.dialog_grocery_grocery_name);
-        EditText edt_quantity = (EditText) view.findViewById(R.id.dialog_grocery_quantity);
-        EditText edt_exp_date = (EditText) view.findViewById(R.id.dialog_grocery_exp_date);
+        EditText edt_grocery_name = (EditText) view.findViewById(R.id.dialog_grocery_name);
+        //for quantity
+        NumberPicker numpicker = (NumberPicker) view.findViewById(R.id.dialog_grocery_quantity_numpicker);
+        numpicker.setMaxValue(1000);
+        numpicker.setMinValue(1);
+        //for exp date
+        DatePicker datepicker = (DatePicker) view.findViewById(R.id.dialog_grocery_exp_date_datepicker);
+        datepicker.setMinDate(System.currentTimeMillis() - 1000);
+
 
         TextView title = (TextView) view.findViewById(R.id.fridge_txt);
         title.setText("If you bought this grocery, save it to your fridge");
+        title.setTextSize(13);
 
         edt_grocery_name.setText(groceryName);
-        edt_quantity.setText(groceryQuantity);
+        numpicker.setValue(groceryQuantity);
 
         builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                numpicker.clearFocus();
                 String grocery_name = edt_grocery_name.getText().toString();
-                Integer quantity = Integer.parseInt(edt_quantity.getText().toString());
-                String exp_date = edt_exp_date.getText().toString();
+                Integer quantity = numpicker.getValue();
+                String exp_date = getDateFromDatePicker(datepicker);
                 String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
                 String fridgeId = fridgeID;
                 Grocery msg = new Grocery(ownerID, fridgeId, grocery_name, quantity, selected_unit, exp_date);
@@ -251,5 +259,17 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         AlertDialog dialog = builder.create();
         dialog.show();
 
+    }
+    /**
+     *
+     * @param datePicker
+     * @return a java.util.Date
+     */
+    public static String getDateFromDatePicker(DatePicker datePicker){
+        int day = datePicker.getDayOfMonth();
+        int month = datePicker.getMonth()+1;
+        int year =  datePicker.getYear();
+        String dateString = day+"-"+month+"-"+year;
+        return dateString;
     }
 }
