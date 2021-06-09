@@ -81,6 +81,7 @@ public class ShoppingListFragment extends Fragment implements ShoppingListAdapte
         }
         Spinner fridge_spinner = (Spinner) getActivity().findViewById(R.id.fridge_spinner);
         fridge_spinner.setEnabled(false);
+        fridge_spinner.setVisibility(View.GONE);
 
         unit_list.add("kg");
         unit_list.add("g");
@@ -102,6 +103,9 @@ public class ShoppingListFragment extends Fragment implements ShoppingListAdapte
         groceryAdaper = new ShoppingListAdapter(getActivity(), fridgeID, grocery_id_list, grocery_list_name, grocery_list_quantity, grocery_list_unit, this);
         recyclerView.setAdapter(groceryAdaper);
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+
+        TextView title = (TextView) view.findViewById(R.id.shopping_list_title);
+        title.setText("Shopping list - "+fridge_name);
 
         FloatingActionButton add = (FloatingActionButton) view.findViewById(R.id.grocery_sh_btn_newGrocery);
         add.setOnClickListener(new View.OnClickListener(){

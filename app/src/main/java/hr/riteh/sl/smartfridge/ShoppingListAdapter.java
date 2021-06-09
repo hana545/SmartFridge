@@ -222,12 +222,11 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
                 Integer quantity = numpicker.getValue();
                 String exp_date = getDateFromDatePicker(datepicker);
                 String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                String fridgeId = fridgeID;
-                Grocery msg = new Grocery(ownerID, fridgeId, grocery_name, quantity, selected_unit, exp_date);
+                Grocery msg = new Grocery(ownerID, grocery_name, quantity, selected_unit, exp_date);
 
                 if (!grocery_name.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null) {
                     //username_textview.setText(msg.text);
-                    FirebaseDatabase.getInstance().getReference().child("grocery").push().setValue(msg).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    FirebaseDatabase.getInstance().getReference().child("grocery").child(fridgeID).push().setValue(msg).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {

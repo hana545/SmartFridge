@@ -8,6 +8,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -23,6 +27,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -35,6 +40,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -47,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Fridge;
+import hr.riteh.sl.smartfridge.FirebaseDatabase.Message;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.MyFridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.User;
 
@@ -63,7 +70,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     private List<String> owner_id_list = new ArrayList<String>();
 
 
-    private String fridge_name;
+    private String fridgeID;
     int selected_fridge = 0;
     private String ownerID;
     long countFridge = 0;
@@ -90,7 +97,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         getSupportActionBar().setCustomView(R.layout.titlebar);
 
         getAllFridges();
-
+      
         //change fridge
         Spinner spinner = (Spinner) findViewById(R.id.fridge_spinner);
         spinner.setOnItemSelectedListener(this);
@@ -232,8 +239,9 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
         switch (item.getItemId()) {
-            case R.id.options_myprofile:
-                Toast.makeText(this, "Will go to myprofile: "+Fuser.getEmail(), Toast.LENGTH_SHORT).show();
+            case R.id.options_change_my_name:
+                changeUserName();
+                Toast.makeText(this, "Will show dialog to change name: "+Fuser.getEmail(), Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.options_see_all_fridges:
                 intent = new Intent(HomeActivity.this, SeeAllFridgesActivity.class);
@@ -249,9 +257,6 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                 } else {
                     createNewFridge();
                 }
-                return true;
-            case R.id.options_settings:
-                Toast.makeText(this, "Will go to my settings", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.options_logout:
                 logout();
@@ -431,6 +436,75 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         dialog.show();
     }
 
+ public void changeUserName(){
 
+     Dialog dialog = new Dialog(this);
+     dialog.setCancelable(true);
+
+     View view  = getLayoutInflater().inflate(R.layout.dialog_change_user_name, null);
+     dialog.setContentView(view);
+
+     EditText newName = (EditText) view.findViewById(R.id.dialog_change_name);
+     newName.setText(Fuser.getDisplayName());
+     TextView account = (TextView) view.findViewById(R.id.dialog_change_name_account);
+     account.setText(Fuser.getEmail());
+     Button btn_saveName = (Button) view.findViewById(R.id.dialog_change_name_save);
+
+     btn_saveName.setOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View v) {
+             if(!newName.getText().toString().isEmpty() && newName.getText().toString().length() < 20) {
+                 HashMap<String, Object> changeName = new HashMap<>();
+
+                 changeName.put("name", newName.getText().toString());
+                 fridgeID = new String();
+                 db.child("messages").orderByChild("authorID").equalTo(userID).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        if (snapshot.exists() && snapshot != null) {
+                            for (DataSnapshot message : snapshot.getChildren()) {
+                                message.getRef().child("author").setValue(newName.getText().toString());
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w("TAG: ", databaseError.getMessage());
+                    }
+                });
+                 db.child("myFridges").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
+                     @Override
+                     public void onDataChange(DataSnapshot snapshot) {
+                         if (snapshot.exists() && snapshot != null) {
+                             for (DataSnapshot fridge : snapshot.getChildren()) {
+                                 fridgeID = fridge.getKey();
+                                 db.child("fridgeMembers").child(fridgeID).child(userID).updateChildren(changeName);
+                             }
+
+                             db.child("users").child(userID).updateChildren(changeName);
+                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                     .setDisplayName(newName.getText().toString()).build();
+                             Fuser.updateProfile(profileUpdates);
+                             Toast.makeText(HomeActivity.this, "Your name is updated to " + newName.getText().toString(), Toast.LENGTH_LONG).show();
+                             dialog.dismiss();
+
+                         }
+                     }
+
+                     @Override
+                     public void onCancelled(DatabaseError databaseError) {
+                         Log.w("TAG: ", databaseError.getMessage());
+                     }
+                 });
+             } else {
+                 Toast.makeText(HomeActivity.this, "Error: Invalid name", Toast.LENGTH_LONG).show();
+             }
+         }
+     });
+
+     dialog.show();
+
+ }
 
 }

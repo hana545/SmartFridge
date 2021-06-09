@@ -80,6 +80,7 @@ public class GroceryItemFragment extends Fragment {
         }
         Spinner fridge_spinner = (Spinner) getActivity().findViewById(R.id.fridge_spinner);
         fridge_spinner.setEnabled(false);
+        fridge_spinner.setVisibility(View.GONE);
 
         unit_list.add("kg");
         unit_list.add("g");
@@ -156,7 +157,7 @@ public class GroceryItemFragment extends Fragment {
         datepicker = view.findViewById(R.id.grocery_exp_date_datepicker);
         datepicker.setMinDate(System.currentTimeMillis() - 1000);
         //System.out.println(grocery_id);
-        grocery_query = db.child("grocery").child(grocery_id);
+        grocery_query = db.child("grocery").child(fridgeID).child(grocery_id);
         grocery_query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -191,7 +192,7 @@ public class GroceryItemFragment extends Fragment {
         numpicker = (NumberPicker) view.findViewById(R.id.grocery_item_quantity_numpicker);
         datepicker = view.findViewById(R.id.grocery_exp_date_datepicker);
         datepicker.setMinDate(System.currentTimeMillis() - 1000);
-        grocery_query = db.child("grocery").child(grocery_id);
+        grocery_query = db.child("grocery").child(fridgeID).child(grocery_id);
         grocery_query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -203,7 +204,7 @@ public class GroceryItemFragment extends Fragment {
                 groceryValues.put("quantity", numpicker.getValue());
                 groceryValues.put("unit", selected_unit);
                 groceryValues.put("exp_date",  getDateFromDatePicker(datepicker));
-                db.child("grocery").child(grocery_id).updateChildren(groceryValues);
+                db.child("grocery").child(fridgeID).child(grocery_id).updateChildren(groceryValues);
             }
 
             @Override
@@ -235,7 +236,7 @@ public class GroceryItemFragment extends Fragment {
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                db.child("grocery").child(grocery_id).removeValue();
+                db.child("grocery").child(fridgeID).child(grocery_id).removeValue();
                 Fragment mGroceryFragment = new GroceryFragment();
                 mGroceryFragment.setArguments(getArguments());
                 FragmentManager ft = getFragmentManager();

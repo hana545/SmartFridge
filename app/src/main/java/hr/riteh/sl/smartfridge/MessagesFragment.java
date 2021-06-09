@@ -66,6 +66,7 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
         super.onCreate(savedInstanceState);
         Spinner fridge_spinner = (Spinner) getActivity().findViewById(R.id.fridge_spinner);
         fridge_spinner.setEnabled(true);
+        fridge_spinner.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -176,8 +177,12 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
                             }
                         }
                     });
-                } else {
+                } else if (!text.matches("")) {
                     Toast.makeText(getActivity(), "You must enter text", Toast.LENGTH_LONG).show();
+                } else if (text.length() < 400) {
+                    Toast.makeText(getActivity(), "Message is to long", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getActivity(), "Couldnt create message", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -195,7 +200,7 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
     }
 
     @Override
-    public void onMessageClick(int position) {  ///////////////PROMJENIT DISPLAY NAME U ID!!!!!!!!!!!!
+    public void onMessageClick(int position) {
         String messageID = messages_id_list.get(position);
         final String authorID = messages_list_authorID.get(position);
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();

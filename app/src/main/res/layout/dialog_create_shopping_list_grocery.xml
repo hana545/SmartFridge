@@ -33,6 +33,7 @@
         android:layout_marginTop="10dp"
         android:hint="Grocery name"
         android:ems="10"
+        android:maxLength="30"
         android:gravity="start|top"
         android:inputType="textMultiLine"
         android:textColor="@color/black"

@@ -8,7 +8,7 @@
     android:background="@drawable/grocery_row_border">
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:padding="8dp"
         android:layout_height="50dp"
         android:id="@+id/recycler_fridge_name"
@@ -36,29 +36,32 @@
         android:textSize="16sp">
     </TextView>
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true">
 
-
-    <Button
-        android:id="@+id/recycler_btn_members"
-        app:srcCompat="@drawable/ic_group_people"
-        android:backgroundTint="@color/tirkiz"
-        android:tint="@color/white"
-        tools:ignore="VectorDrawableCompat"
-        android:layout_alignParentTop="true"
-        android:layout_width="55dp"
-        android:layout_height="50dp"
-        android:layout_marginRight="3dp"
-        android:drawableTop="@drawable/ic_group_people"
-        android:layout_alignParentRight="true"/>
-    <Button
-        android:id="@+id/recycler_btn_leave"
-        android:layout_width="55dp"
-        android:layout_height="50dp"
-        android:layout_marginRight="3dp"
-        android:drawableTop="@drawable/ic_person_remove"
-        android:backgroundTint="#E9802222"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/recycler_btn_members"/>
+        <Button
+            android:id="@+id/recycler_btn_members"
+            app:srcCompat="@drawable/ic_group_people"
+            android:backgroundTint="@color/tirkiz"
+            android:tint="@color/white"
+            tools:ignore="VectorDrawableCompat"
+            android:layout_alignParentRight="true"
+            android:layout_width="55dp"
+            android:layout_height="50dp"
+            android:layout_marginRight="12dp"
+            android:drawableTop="@drawable/ic_group_people"/>
+        <Button
+            android:id="@+id/recycler_btn_leave"
+            android:layout_width="55dp"
+            android:layout_height="50dp"
+            android:layout_marginRight="12dp"
+            android:drawableTop="@drawable/ic_person_remove"
+            android:backgroundTint="#E9802222"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/recycler_btn_members"/>
+    </RelativeLayout>
 
 
 

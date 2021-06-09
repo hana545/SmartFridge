@@ -1,6 +1,7 @@
 package hr.riteh.sl.smartfridge;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -11,6 +12,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -110,6 +112,9 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
         fridge1 = (EditText) findViewById(R.id.settings_fridge_name1);
         fridge2 = (EditText) findViewById(R.id.settings_fridge_name2);
         fridge3 = (EditText) findViewById(R.id.settings_fridge_name3);
+        fridge1.clearFocus();
+        fridge2.clearFocus();
+        fridge3.clearFocus();
 
 
         btn_del_fridge1 = (Button) findViewById(R.id.settings_delete_fridge1);
@@ -138,7 +143,6 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
                 fridge_new_names.add(fridge1.getText().toString());
                 fridge_new_names.add(fridge2.getText().toString());
                 fridge_new_names.add(fridge3.getText().toString());
-                Log.i("CHANGENAME", "new names: "+fridge_new_names);
                 for (Integer i = 0; i < countMyFridge; i++) {
                     if (fridge_new_names.get(i).equals("")) {
                         Toast.makeText(FridgeSettingsActivity.this, "Name can not be empty or the same as old one", Toast.LENGTH_LONG).show();
@@ -176,7 +180,6 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
                 }
 
                 if(changeNames || changePrimary){
-                    Log.i("CHANGENAME", "/////////////:");
                     fillData();
 
                     Toast.makeText(FridgeSettingsActivity.this, "Saved changes", Toast.LENGTH_LONG).show();
@@ -287,6 +290,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
 
         if(countMyFridge > 0){
             fridge1.setVisibility(View.VISIBLE);
+            fridge1.clearFocus();
             findViewById(R.id.settings_name1).setVisibility(View.VISIBLE);
             btn_del_fridge1.setEnabled(true);
             btn_del_fridge1.setVisibility(View.VISIBLE);
@@ -298,6 +302,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
         }
         if(countMyFridge > 1){
             fridge2.setVisibility(View.VISIBLE);
+            fridge2.clearFocus();
             findViewById(R.id.settings_name2).setVisibility(View.VISIBLE);
             btn_del_fridge2.setEnabled(true);
             btn_del_fridge2.setVisibility(View.VISIBLE);
@@ -309,6 +314,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
         }
         if(countMyFridge > 2){
             fridge3.setVisibility(View.VISIBLE);
+            fridge3.clearFocus();
             findViewById(R.id.settings_name3).setVisibility(View.VISIBLE);
             btn_del_fridge3.setEnabled(true);
             btn_del_fridge3.setVisibility(View.VISIBLE);
@@ -324,7 +330,6 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
         checkFridges();
         adapter.notifyDataSetChanged();
         spinner.setSelection(0);
-        Log.i("SPINNERUNIT", "info: "+spinner.getSelectedItem());
 
         //check delete buttons
         if(btn_del_fridge1.isEnabled()) {
@@ -754,24 +759,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
         });
 
         ///delete grocery
-        db.child("grocery").orderByChild("fridgeID").equalTo(fridgeID).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                for (DataSnapshot grocery: snapshot.getChildren()) {
-                    if(snapshot.exists() && snapshot != null) {
-                        grocery.getRef().removeValue();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-
-
-        });
-
+        db.child("grocery").child(fridgeID).removeValue();
 
     }
 

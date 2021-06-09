@@ -104,6 +104,7 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
         view = inflater.inflate(R.layout.fragment_grocery, container, false);
         Spinner fridge_spinner = (Spinner) getActivity().findViewById(R.id.fridge_spinner);
         fridge_spinner.setEnabled(true);
+        fridge_spinner.setVisibility(View.VISIBLE);
 
         if (getArguments() != null){
             fridgeID = getArguments().getString("fridgeID");
@@ -153,7 +154,7 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
 
     private void showGroceries(){
 
-        groceries_query = db.child("grocery").orderByChild("fridgeID").equalTo(fridgeID);
+        groceries_query = db.child("grocery").child(fridgeID).orderByChild("grocery_name");
         groceries_query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -242,22 +243,19 @@ public class GroceryFragment extends Fragment implements GroceryAdaper.OnGrocery
                 Integer quantity = numpicker.getValue();
                 String exp_date = getDateFromDatePicker(datepicker);
                 String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                String fridgeId = fridgeID;
-                Grocery msg = new Grocery(ownerID, fridgeId, grocery_name, quantity, selected_unit, exp_date);
+                Grocery msg = new Grocery(ownerID, grocery_name, quantity, selected_unit, exp_date);
 
                 if (!grocery_name.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null) {
                     //username_textview.setText(msg.text);
-                    FirebaseDatabase.getInstance().getReference().child("grocery").push().setValue(msg).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    Log.i("FRIDGENAME","fridge"+fridgeID);
+                    FirebaseDatabase.getInstance().getReference().child("grocery").child(fridgeID).push().setValue(msg).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                Log.i("SPINNERUNIT","obavio");
                                 showGroceries();
                                 Toast.makeText(MyApplication.getAppContext(), "Grocery saved!", Toast.LENGTH_LONG).show();
 
                             } else {
-
-                                Log.i("SPINNERUNIT","nece");
                                 Toast.makeText(MyApplication.getAppContext(), "Failed to create grocery! Try again.", Toast.LENGTH_LONG).show();
 
                             }

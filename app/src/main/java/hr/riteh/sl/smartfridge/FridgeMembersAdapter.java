@@ -38,6 +38,7 @@ public class FridgeMembersAdapter extends RecyclerView.Adapter<FridgeMembersAdap
     List<String> id, name, email;
     String fridgeID, fridge_ownerId;
     Context context;
+    Integer counter = 0;
 
     private OnMemberListener mOnMemberListener;
 
@@ -60,7 +61,8 @@ public class FridgeMembersAdapter extends RecyclerView.Adapter<FridgeMembersAdap
 
     @Override
     public void onBindViewHolder(@NonNull MemberViewHolder holder, int position) {
-        holder.row_name.setText(name.get(position));
+        counter++;
+        holder.row_name.setText(counter+". "+name.get(position));
         holder.position = position;
 
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();

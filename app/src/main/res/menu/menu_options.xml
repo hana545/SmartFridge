@@ -4,8 +4,8 @@
 
 
     <item
-        android:title="My profile"
-        android:id="@+id/options_myprofile"
+        android:title="Change my name"
+        android:id="@+id/options_change_my_name"
         app:showAsAction="never"
 
         />
@@ -16,7 +16,7 @@
 
         />
     <item
-        android:title="Manage fridges"
+        android:title="Fridge settings"
         android:id="@+id/options_fridges"
         app:showAsAction="never"
 
@@ -28,12 +28,6 @@
 
         />
 
-    <item
-        android:title="Settings"
-        android:id="@+id/options_settings"
-        app:showAsAction="never"
-
-        />
     <item
         android:title="Log out"
         android:id="@+id/options_logout"

@@ -65,21 +65,5 @@ public class RecipesActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.options_myprofile:
-                Toast.makeText(this, "Will go to myprofile", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.options_settings:
-                Toast.makeText(this, "Will go to my settings", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.options_logout:
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(RecipesActivity.this, LoginActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
+
 }
