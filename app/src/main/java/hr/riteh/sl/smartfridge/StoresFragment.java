@@ -3,36 +3,44 @@ package hr.riteh.sl.smartfridge;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,14 +52,13 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Store;
 
-public class StoresFragment extends Fragment  {
+public class StoresFragment extends Fragment {
 
     private String fridgeID;
     private String fridge_name;
@@ -59,12 +66,15 @@ public class StoresFragment extends Fragment  {
     private static Query store_query;
     private DatabaseReference db = FirebaseDatabase.getInstance().getReference();
     private GeofencingClient geofencingClient;
+    private GeofenceHelper geofenceHelper;
     private int FINE_LOCATION_ACCESS_REQUEST_CODE = 10001;
+    private float GEOFENCE_RADIUS = 1;
 
     private static StoreAdapter storeAdapter;
     private static List<String> stores_name_text = new ArrayList<String>();
     private GoogleMap gMap;
     private Marker mark;
+    private Circle circ;
     private View view;
 
     public StoresFragment() {
@@ -81,6 +91,7 @@ public class StoresFragment extends Fragment  {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_stores, container, false);
         geofencingClient = LocationServices.getGeofencingClient(this.getContext());
+        geofenceHelper = new GeofenceHelper(this.getContext());
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
@@ -91,7 +102,6 @@ public class StoresFragment extends Fragment  {
 
                 LatLng sydney = new LatLng(45, 14.00);
                 gMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-
 
 
                 store_query = db.child("stores").orderByChild("userID").equalTo(FirebaseAuth.getInstance().getCurrentUser().getUid());
@@ -105,6 +115,7 @@ public class StoresFragment extends Fragment  {
                                 if (storeData != null) {
                                     LatLng ll = new LatLng(storeData.lat, storeData.lng);
                                     mark = gMap.addMarker(new MarkerOptions().position(ll).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title(storeData.name));
+                                    /*createCircle(ll);*/
                                     mark.setTag(store.getKey());
                                 }
                             }
@@ -125,17 +136,19 @@ public class StoresFragment extends Fragment  {
                         MarkerOptions marker = new MarkerOptions();
                         marker.position(latLng);
                         marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-                        gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 5));
+                        gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
                         mark = gMap.addMarker(marker);
-                        createNewStore(latLng, mark);
+                        circ = createCircle(latLng);
+                        createNewStore(latLng, mark, circ);
                     }
                 });
 
                 gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
-                        if(marker.getTag() != null) {
-                            editStore(marker);
+                        if (marker.getTag() != null) {
+                            gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 16));
+                            editStore(marker, circ);
                         }
                         return false;
                     }
@@ -143,7 +156,7 @@ public class StoresFragment extends Fragment  {
             }
         });
 
-        if (getArguments() != null){
+        if (getArguments() != null) {
             fridgeID = getArguments().getString("fridgeID");
             fridge_name = getArguments().getString("fridge_name");
             //Log.i("STORESGETFRIDGE", "onCreateView: uzme argument arg="+fridgeID);
@@ -166,16 +179,28 @@ public class StoresFragment extends Fragment  {
     }
 
 
-    private void enableUserLocation(){
-        if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+    private void enableUserLocation() {
+        if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             gMap.setMyLocationEnabled(true);
         } else {
-            if (shouldShowRequestPermissionRationale( Manifest.permission.ACCESS_FINE_LOCATION)) {
-                requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_ACCESS_REQUEST_CODE);
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_ACCESS_REQUEST_CODE);
             } else {
-                requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_ACCESS_REQUEST_CODE);
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_ACCESS_REQUEST_CODE);
             }
         }
+    }
+
+    private Circle createCircle(LatLng latlng) {
+
+        CircleOptions circleOptions = new CircleOptions();
+        circleOptions.center(latlng);
+        circleOptions.radius(GEOFENCE_RADIUS);
+        circleOptions.strokeColor(Color.argb(255, 255, 0, 0));
+        circleOptions.fillColor(Color.argb(64, 255, 0, 0));
+        circleOptions.strokeWidth(4);
+        return gMap.addCircle(circleOptions);
+
     }
 
     @SuppressLint("MissingPermission")
@@ -190,7 +215,7 @@ public class StoresFragment extends Fragment  {
         }
     }
 
-    private void editStore(Marker marker){
+    private void editStore(Marker marker, Circle circle) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
 
 
@@ -209,7 +234,7 @@ public class StoresFragment extends Fragment  {
                 store_query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        Map<String, Object> storeValues = new HashMap<String,Object>();
+                        Map<String, Object> storeValues = new HashMap<String, Object>();
                         for (DataSnapshot snap : snapshot.getChildren()) {
                             storeValues.put(snap.getKey(), snap.getValue());
                         }
@@ -245,7 +270,7 @@ public class StoresFragment extends Fragment  {
                     @Override
                     public void onClick(View v) {
                         System.out.println("stisnut delete");
-                        deleteStore(marker);
+                        deleteStore(marker, circle);
                         dialog.dismiss();
                     }
                 });
@@ -255,7 +280,7 @@ public class StoresFragment extends Fragment  {
 
     }
 
-    private void createNewStore(LatLng latLng, Marker marker) {
+    private void createNewStore(LatLng latLng, Marker marker, Circle circle) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
 
@@ -272,12 +297,14 @@ public class StoresFragment extends Fragment  {
                 String author_id = FirebaseAuth.getInstance().getCurrentUser().getUid();
                 Store str = new Store(name, author_id, latLng.latitude, latLng.longitude);
 
+
                 if (!name.matches("") && name.length() < 400 && FirebaseAuth.getInstance().getCurrentUser() != null) {
                     FirebaseDatabase.getInstance().getReference().child("stores").push().setValue(str).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-
+                                String id = FirebaseDatabase.getInstance().getReference().child("stores").push().getKey();
+                                addGeofence(latLng, GEOFENCE_RADIUS, id);
                             } else {
                                 System.out.println("Error");
                             }
@@ -293,6 +320,8 @@ public class StoresFragment extends Fragment  {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 marker.remove();
+                circle.setVisible(false);
+                circle.remove();
                 dialog.dismiss();
             }
         });
@@ -308,15 +337,17 @@ public class StoresFragment extends Fragment  {
 
     }
 
-    public void deleteStore(Marker marker){
+    public void deleteStore(Marker marker, Circle circle) {
         System.out.println(marker.getTag().toString());
         store_query = db.child("stores").child(marker.getTag().toString());
         store_query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                for (DataSnapshot store: snapshot.getChildren()) {
+                for (DataSnapshot store : snapshot.getChildren()) {
                     store.getRef().removeValue();
                     marker.remove();
+                    circle.setVisible(false);
+                    circle.remove();
                 }
             }
 
@@ -328,6 +359,34 @@ public class StoresFragment extends Fragment  {
 
         });
 
+    }
+
+    private void addGeofence(LatLng latlng, float radius, String id) {
+        Geofence geofence = geofenceHelper.getGeofence(id, latlng, radius, Geofence.GEOFENCE_TRANSITION_ENTER);
+        GeofencingRequest geofencingRequest = geofenceHelper.getGeofencingRequest(geofence);
+        PendingIntent pendingIntent = geofenceHelper.getPendingIntent();
+        /*if (ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }*/
+        geofencingClient.addGeofences(geofencingRequest, pendingIntent).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d("StoresFragment", "On Success: Geofence added");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                String errorMessage = geofenceHelper.getErrorString(e);
+                Log.d("StoresFragment", "onFailure: " + errorMessage);
+            }
+        });
     }
 
 }
