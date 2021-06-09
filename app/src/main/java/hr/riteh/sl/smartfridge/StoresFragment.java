@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -23,6 +24,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
@@ -68,7 +71,8 @@ public class StoresFragment extends Fragment {
     private GeofencingClient geofencingClient;
     private GeofenceHelper geofenceHelper;
     private int FINE_LOCATION_ACCESS_REQUEST_CODE = 10001;
-    private float GEOFENCE_RADIUS = 1;
+    private int BACKGROUND_LOCATION_ACCESS_REQUEST_CODE = 10002;
+    private float GEOFENCE_RADIUS = 100;
 
     private static StoreAdapter storeAdapter;
     private static List<String> stores_name_text = new ArrayList<String>();
@@ -90,6 +94,9 @@ public class StoresFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_stores, container, false);
+        Spinner fridgeSpinner = (Spinner) getActivity().findViewById(R.id.fridge_spinner);
+        fridgeSpinner.setEnabled(false);
+        fridgeSpinner.setVisibility(View.GONE);
         geofencingClient = LocationServices.getGeofencingClient(this.getContext());
         geofenceHelper = new GeofenceHelper(this.getContext());
 
@@ -213,6 +220,15 @@ public class StoresFragment extends Fragment {
 
             }
         }
+
+
+        if (requestCode == BACKGROUND_LOCATION_ACCESS_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(getContext(), "You can add geofences", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "Background location is neccessary for geofences to trigger", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void editStore(Marker marker, Circle circle) {
@@ -304,7 +320,21 @@ public class StoresFragment extends Fragment {
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 String id = FirebaseDatabase.getInstance().getReference().child("stores").push().getKey();
-                                addGeofence(latLng, GEOFENCE_RADIUS, id);
+
+                                /*if(Build.VERSION.SDK_INT >= 29) {
+                                    if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                        addGeofence(latLng, GEOFENCE_RADIUS, id);
+                                    } else {
+                                        if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+                                           requestPermissions(new String[] {Manifest.permission.ACCESS_BACKGROUND_LOCATION},  BACKGROUND_LOCATION_ACCESS_REQUEST_CODE);
+                                        } else {
+                                            requestPermissions(new String[] {Manifest.permission.ACCESS_BACKGROUND_LOCATION},  BACKGROUND_LOCATION_ACCESS_REQUEST_CODE);
+                                        }
+                                    }
+                                } else {*/
+                                    addGeofence(latLng, GEOFENCE_RADIUS, id);
+                                /*}*/
+
                             } else {
                                 System.out.println("Error");
                             }
@@ -346,8 +376,8 @@ public class StoresFragment extends Fragment {
                 for (DataSnapshot store : snapshot.getChildren()) {
                     store.getRef().removeValue();
                     marker.remove();
-                    circle.setVisible(false);
-                    circle.remove();
+                    /*circle.setVisible(false);
+                    circle.remove();*/
                 }
             }
 
