@@ -71,7 +71,7 @@ public class ShoppingListFragment extends Fragment implements ShoppingListAdapte
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null){
-            fridgeID = getArguments().getString("fridgeID");
+            System.out.println(getArguments().getString("fridgeID"));            fridgeID = getArguments().getString("fridgeID");
             fridge_name = getArguments().getString("fridge_name");
 
             showGroceriesSH();

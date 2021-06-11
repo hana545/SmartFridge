@@ -8,26 +8,6 @@
     android:background="@drawable/gradient_white_blue">
 
 
-    <!--<TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Stores near me"
-        android:textStyle="bold"
-        android:textAlignment="center"
-        android:gravity="center"
-        android:textSize="50sp"
-        android:layout_centerInParent="true"
-        />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_stores"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="0dp"
-        android:layout_marginTop="0dp"
-        >
-    </androidx.recyclerview.widget.RecyclerView>-->
-
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -37,15 +17,5 @@
         android:layout_height="match_parent"
         tools:context=".MapsActivity" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/stores_btn_newStore"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="40dp"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="40dp"
-        app:srcCompat="@android:drawable/ic_input_add" />
 
 </RelativeLayout>

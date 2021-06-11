@@ -70,6 +70,7 @@ public class StoresFragment extends Fragment {
     private DatabaseReference db = FirebaseDatabase.getInstance().getReference();
     private GeofencingClient geofencingClient;
     private GeofenceHelper geofenceHelper;
+    private PendingIntent pendingIntent;
     private int FINE_LOCATION_ACCESS_REQUEST_CODE = 10001;
     private int BACKGROUND_LOCATION_ACCESS_REQUEST_CODE = 10002;
     private float GEOFENCE_RADIUS = 100;
@@ -106,10 +107,6 @@ public class StoresFragment extends Fragment {
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 gMap = googleMap;
-
-                LatLng sydney = new LatLng(45, 14.00);
-                gMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-
 
                 store_query = db.child("stores").orderByChild("userID").equalTo(FirebaseAuth.getInstance().getCurrentUser().getUid());
                 store_query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -156,6 +153,11 @@ public class StoresFragment extends Fragment {
                         if (marker.getTag() != null) {
                             gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 16));
                             editStore(marker, circ);
+                            try {
+                                removeGeofence();
+                            } catch (Exception e){
+                                //error
+                            }
                         }
                         return false;
                     }
@@ -172,15 +174,6 @@ public class StoresFragment extends Fragment {
             fridge_name = "null";
             //Log.i("STORESGETFRIDGE", "onCreateView: ne uzme argument");
         }
-
-        FloatingActionButton fab = view.findViewById(R.id.stores_btn_newStore);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), MapsActivity.class);
-                startActivity(intent);
-            }
-        });
 
         return view;
     }
@@ -286,8 +279,15 @@ public class StoresFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         System.out.println("stisnut delete");
+                        List<String> list = new ArrayList<String>();
+                        list.add(marker.getTag().toString());
+                        System.out.println(list);
+                        geofencingClient.removeGeofences(list);
                         deleteStore(marker, circle);
+                        removeGeofence();
+                        reinstantiateGeofences();
                         dialog.dismiss();
+
                     }
                 });
             }
@@ -320,8 +320,8 @@ public class StoresFragment extends Fragment {
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 String id = FirebaseDatabase.getInstance().getReference().child("stores").push().getKey();
-
-                                /*if(Build.VERSION.SDK_INT >= 29) {
+                                /*setMarkers();*/
+                                if(Build.VERSION.SDK_INT >= 29) {
                                     if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                                         addGeofence(latLng, GEOFENCE_RADIUS, id);
                                     } else {
@@ -331,9 +331,9 @@ public class StoresFragment extends Fragment {
                                             requestPermissions(new String[] {Manifest.permission.ACCESS_BACKGROUND_LOCATION},  BACKGROUND_LOCATION_ACCESS_REQUEST_CODE);
                                         }
                                     }
-                                } else {*/
+                                } else {
                                     addGeofence(latLng, GEOFENCE_RADIUS, id);
-                                /*}*/
+                                }
 
                             } else {
                                 System.out.println("Error");
@@ -341,7 +341,11 @@ public class StoresFragment extends Fragment {
                         }
                     });
                 } else {
-                    System.out.println("yo");
+                    Toast.makeText(getContext(), "Please insert valid store name", Toast.LENGTH_LONG).show();
+                    marker.remove();
+                    circle.setVisible(false);
+                    circle.remove();
+
                 }
             }
         });
@@ -391,10 +395,11 @@ public class StoresFragment extends Fragment {
 
     }
 
+    @SuppressLint("MissingPermission")
     private void addGeofence(LatLng latlng, float radius, String id) {
         Geofence geofence = geofenceHelper.getGeofence(id, latlng, radius, Geofence.GEOFENCE_TRANSITION_ENTER);
         GeofencingRequest geofencingRequest = geofenceHelper.getGeofencingRequest(geofence);
-        PendingIntent pendingIntent = geofenceHelper.getPendingIntent();
+        pendingIntent = geofenceHelper.getPendingIntent();
         /*if (ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -418,5 +423,112 @@ public class StoresFragment extends Fragment {
             }
         });
     }
+
+
+
+    public void removeGeofence() {
+        geofencingClient.removeGeofences(getGeofencePendingIntent())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+    }
+
+    private PendingIntent getGeofencePendingIntent() {
+        // Ne stvaraj novi PendingIntent ukoliko vec postoji:
+        if (pendingIntent != null) {
+            return pendingIntent;
+        }
+
+        // Sto ce se konkretno obaviti kada se detektira neka tranzicija?
+        // Doticni posao obavlja broadcast receiver GeofenceBroadcastReceiver:
+        Intent intent = new Intent(getContext(), GeofenceBroadcastReciever.class);
+
+        // @Android:
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
+        // calling addGeofences() and removeGeofences().
+        pendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        return pendingIntent;
+    }
+
+
+    private void reinstantiateGeofences() {
+        store_query = db.child("stores").orderByChild("userID").equalTo(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        store_query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                stores_name_text.clear();
+                if (snapshot.exists()) {
+                    for (DataSnapshot store : snapshot.getChildren()) {
+                        Store storeData = store.getValue(Store.class);
+                        if (storeData != null) {
+                            LatLng ll = new LatLng(storeData.lat, storeData.lng);
+                            addGeofence(ll, GEOFENCE_RADIUS, store.getKey());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+
+    private void setMarkers(){
+        gMap.clear();
+
+        store_query = db.child("stores").orderByChild("userID").equalTo(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        store_query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                stores_name_text.clear();
+                if (snapshot.exists()) {
+                    for (DataSnapshot store : snapshot.getChildren()) {
+                        Store storeData = store.getValue(Store.class);
+                        if (storeData != null) {
+                            LatLng ll = new LatLng(storeData.lat, storeData.lng);
+                            mark = gMap.addMarker(new MarkerOptions().position(ll).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title(storeData.name));
+                            mark.setTag(store.getKey());
+                            addGeofence(ll, GEOFENCE_RADIUS, store.getKey());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                if (marker.getTag() != null) {
+                    gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 16));
+                    editStore(marker, circ);
+                    try {
+                        removeGeofence();
+                    } catch (Exception e){
+                        //error
+                    }
+                }
+                return false;
+            }
+        });
+
+    }
+
 
 }

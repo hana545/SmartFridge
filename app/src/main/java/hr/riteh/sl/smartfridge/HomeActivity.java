@@ -112,7 +112,6 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         ft.beginTransaction().replace(R.id.fragment_container, mMessagesFragment).commit();
         active = mMessagesFragment;
 
-
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         bottomNavigationView.setSelectedItemId(R.id.fridge);
@@ -189,6 +188,21 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                     adapter.notifyDataSetChanged();
                     countFridge = snapshot.getChildrenCount();
                     mProgressDialog.dismiss();
+                    Intent intent = getIntent();
+                    if (intent.getBooleanExtra("fromNotification", false)){
+                        Fragment mGroceryShoppingList = new ShoppingListFragment();
+
+                        Bundle args = new Bundle();
+                        System.out.println(fridge_id_list);
+                        System.out.println(fridge_list);
+
+                        args.putString("fridgeID", fridge_id_list.get(selected_fridge));
+                        args.putString("fridge_name", fridge_list.get(selected_fridge));
+                        mGroceryShoppingList.setArguments(args);
+                        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+                        bottomNavigationView.setSelectedItemId(R.id.grocery);
+                        ft.beginTransaction().replace(R.id.fragment_container, mGroceryShoppingList).addToBackStack(null).commit();
+                    }
                 } else {
                     Toast.makeText(HomeActivity.this, "You dont have any fridges", Toast.LENGTH_LONG).show();
                     mProgressDialog.dismiss();

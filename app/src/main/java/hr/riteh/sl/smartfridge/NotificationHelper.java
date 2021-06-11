@@ -45,6 +45,7 @@ public class NotificationHelper extends ContextWrapper {
     public void sendHighPriorityNotification(String title, String body, Class activityName) {
 
         Intent intent = new Intent(this, activityName);
+        intent.putExtra("fromNotification", true);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 267, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -52,7 +53,7 @@ public class NotificationHelper extends ContextWrapper {
 //                .setContentText(body)
                 .setSmallIcon(R.drawable.ic_fridge)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setStyle(new NotificationCompat.BigTextStyle().setSummaryText("summary").setBigContentTitle(title).bigText(body))
+                .setStyle(new NotificationCompat.BigTextStyle().setSummaryText("Store Alert").setBigContentTitle(title).bigText(body))
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
                 .build();
