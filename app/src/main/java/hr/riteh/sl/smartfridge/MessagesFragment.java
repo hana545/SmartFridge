@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,18 @@ import java.util.Collections;
 import java.util.List;
 
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Message;
+import hr.riteh.sl.smartfridge.FirebaseDatabase.Token;
+import hr.riteh.sl.smartfridge.FirebaseDatabase.User;
+import hr.riteh.sl.smartfridge.SendNotification.APIService;
+import hr.riteh.sl.smartfridge.SendNotification.Client;
+import hr.riteh.sl.smartfridge.SendNotification.Data;
+import hr.riteh.sl.smartfridge.SendNotification.MyResponse;
+import hr.riteh.sl.smartfridge.SendNotification.NotificationSender;
+import hr.riteh.sl.smartfridge.SendNotification.Notifications;
+import hr.riteh.sl.smartfridge.Service.MyFirebaseMessagingService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class MessagesFragment extends Fragment implements MessageAdapter.OnMessageListener {
@@ -51,10 +64,13 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
     private static List<String> messages_list_authorID= new ArrayList<String>();
     private static List<String> messages_id_list = new ArrayList<String>();
 
+    private APIService apiService;
     private String fridgeID;
     private String fridge_name;
     private String ownerId;
 
+
+    private static List<String> fridge_members_id = new ArrayList<String>();
     private View view;
 
     public MessagesFragment() {
@@ -169,6 +185,7 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 getFridgeMessages(fridgeID);
+                                Notifications.sendNotificationToMembers_newMessage(fridgeID, "New message on the fridge", author_name+" post a new message");
                                 Toast.makeText(getActivity(), "Message posted!", Toast.LENGTH_LONG).show();
 
                             } else {
@@ -255,5 +272,8 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
 
         dialog.show();
     }
+
+
+
 
 }

@@ -46,6 +46,7 @@ import java.util.List;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Fridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.MyFridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.User;
+import hr.riteh.sl.smartfridge.SendNotification.Notifications;
 
 public class FridgeSettingsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, FridgeMembersAdapter.OnMemberListener {
 
@@ -64,6 +65,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
 
     private List<String> fridge_new_names = new ArrayList<String>();
     String memberID;
+    String memberName = "";
 
     private String primaryId_old;
     private String primaryId_new;
@@ -526,7 +528,6 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists()) {
-                                String memberID = "";
                                 User newMember = new User();
                                 for (DataSnapshot users : snapshot.getChildren()) {
                                     User userData = users.getValue(User.class);
@@ -535,6 +536,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
                                             exists = true;
                                             memberID = users.getKey();
                                             newMember = userData;
+                                            memberName = newMember.name;
                                         }
                                     }
                                 }
@@ -545,6 +547,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if (task.isSuccessful()) {
+                                                Notifications.sendNotificationToMembers_joinedFridge(selected_fridge_id, "New member has been added", "User "+ memberName +"has joined "+ fridge_name+" fridge", memberID, fridge_name);
                                                 Toast.makeText(FridgeSettingsActivity.this, "Member added!", Toast.LENGTH_LONG).show();
                                             } else {
                                                 Toast.makeText(FridgeSettingsActivity.this, "Failed to create fridge! Try again.", Toast.LENGTH_LONG).show();

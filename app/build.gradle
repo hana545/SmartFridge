@@ -36,6 +36,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.google.firebase:firebase-database:19.7.0'
     implementation 'com.google.firebase:firebase-auth:20.0.4'
+    implementation 'com.google.firebase:firebase-messaging:20.1.2'
     implementation 'com.google.firebase:firebase-core:16.0.1'
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.android.gms:play-services-location:18.0.0'
@@ -45,9 +46,12 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-
+    //custom buttons
     implementation 'com.shobhitpuri.custombuttons:google-signin:1.1.0'
-
-    implementation 'com.journeyapps:zxing-android-embedded:4.2.0'
     compile 'org.honorato.multistatetogglebutton:multistatetogglebutton:0.2.2'
+    //barcode scanner
+    implementation 'com.journeyapps:zxing-android-embedded:4.2.0'
+    //for notifications
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
 }

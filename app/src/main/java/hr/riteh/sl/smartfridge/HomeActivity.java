@@ -48,6 +48,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -60,7 +61,16 @@ import hr.riteh.sl.smartfridge.FirebaseDatabase.Grocery;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.GrocerySH;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Message;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.MyFridge;
+import hr.riteh.sl.smartfridge.FirebaseDatabase.Token;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.User;
+import hr.riteh.sl.smartfridge.SendNotification.APIService;
+import hr.riteh.sl.smartfridge.SendNotification.Client;
+import hr.riteh.sl.smartfridge.SendNotification.Data;
+import hr.riteh.sl.smartfridge.SendNotification.MyResponse;
+import hr.riteh.sl.smartfridge.SendNotification.NotificationSender;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomeActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -74,7 +84,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     private List<String> fridge_id_list = new ArrayList<String>();
     private List<String> owner_id_list = new ArrayList<String>();
 
-
+    private APIService apiService;
     private String fridgeID;
     int selected_fridge = 0;
     private String ownerID;
@@ -103,7 +113,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         getSupportActionBar().setCustomView(R.layout.titlebar);
 
         getAllFridges();
-      
+        UpdateToken();
         //change fridge
         Spinner spinner = (Spinner) findViewById(R.id.fridge_spinner);
         spinner.setOnItemSelectedListener(this);
@@ -642,7 +652,12 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
 
+    private void UpdateToken(){
+        FirebaseUser firebaseUser= FirebaseAuth.getInstance().getCurrentUser();
+        String refreshToken= FirebaseInstanceId.getInstance().getToken();
+        db.child("tokens").child(firebaseUser.getUid()).child("token").setValue(refreshToken);
 
+    }
 
 
 
