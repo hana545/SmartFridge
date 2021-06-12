@@ -10,6 +10,12 @@
 
         />
     <item
+        android:title="Scan new grocery data"
+        android:id="@+id/options_add_grocery_data"
+        app:showAsAction="never"
+
+        />
+    <item
         android:title="See all fridges"
         android:id="@+id/options_see_all_fridges"
         app:showAsAction="never"

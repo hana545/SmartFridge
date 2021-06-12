@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "hr.riteh.sl.smartfridge"
-        minSdkVersion 16
+        minSdkVersion 24
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -47,4 +47,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     implementation 'com.shobhitpuri.custombuttons:google-signin:1.1.0'
+
+    implementation 'com.journeyapps:zxing-android-embedded:4.2.0'
+    compile 'org.honorato.multistatetogglebutton:multistatetogglebutton:0.2.2'
 }

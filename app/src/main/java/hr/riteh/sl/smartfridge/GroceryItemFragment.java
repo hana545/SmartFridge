@@ -163,7 +163,7 @@ public class GroceryItemFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Grocery groceryData = snapshot.getValue(Grocery.class);
                 if(groceryData != null) {
-                    grocery_name = groceryData.grocery_name;
+                    grocery_name = groceryData.name;
                     grocery_unit = groceryData.unit;
                     grocery_exp_date = groceryData.exp_date;
                     String[] date_parts = grocery_exp_date.split("-");

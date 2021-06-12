@@ -3,62 +3,66 @@
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:id="@+id/recycler_grocery_relative_layout"
     android:background="@drawable/grocery_row_border"
     >
 
     <TextView
         android:layout_width="match_parent"
-        android:padding="10dp"
-        android:layout_height="50dp"
+        android:padding="8dp"
+        android:layout_height="40dp"
         android:id="@+id/recycler_grocery_name"
-        android:textSize="24sp">
+        android:textSize="20sp">
     </TextView>
+
     <TextView
         android:layout_width="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="3dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:paddingStart="10dp"
-        android:layout_height="50dp"
+        android:layout_marginLeft="5dp"
+        android:layout_height="30dp"
         android:id="@+id/recycler_grocery_quantity"
         android:layout_below="@id/recycler_grocery_name"
-        android:textSize="16sp"
+        android:textSize="15sp"
         android:paddingLeft="10dp">
     </TextView>
 
     <TextView
         android:layout_width="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="3dp"
-        android:layout_height="50dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:paddingLeft="5dp"
+        android:layout_height="30dp"
         android:id="@+id/recycler_grocery_unit"
         android:layout_below="@id/recycler_grocery_name"
         android:layout_toRightOf="@id/recycler_grocery_quantity"
-        android:layout_marginLeft="1dp"
-        android:textSize="16sp">
+        android:layout_marginLeft="2dp"
+        android:textSize="15sp">
     </TextView>
 
     <TextView
         android:layout_width="wrap_content"
-        android:padding="10dp"
-        android:layout_height="50dp"
+        android:padding="9dp"
+        android:layout_height="40dp"
         android:id="@+id/recycler_grocery_exp_date_title"
         android:layout_below="@id/recycler_grocery_name"
         android:text="Expiration date:"
         android:textStyle="italic"
         android:layout_toLeftOf="@id/recycler_grocery_exp_date"
         android:layout_marginLeft="60dp"
-        android:textSize="15sp">
+        android:textSize="14sp">
     </TextView>
 
     <TextView
         android:layout_width="wrap_content"
-        android:padding="10dp"
-        android:layout_height="50dp"
+        android:padding="9dp"
+        android:layout_height="40dp"
         android:id="@+id/recycler_grocery_exp_date"
         android:layout_below="@id/recycler_grocery_name"
         android:layout_alignParentRight="true"
         android:layout_marginLeft="10dp"
-        android:textSize="16sp">
+        android:textSize="15sp">
     </TextView>
 
 </RelativeLayout>

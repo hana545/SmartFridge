@@ -18,25 +18,15 @@
         android:padding="15dp"
         android:spinnerMode="dropdown"
         android:textColor = "#FFFFFF"
-        style="@style/Widget.AppCompat.DropDownItem.Spinner"
+        style="@style/Theme.SmartFridge.FridgeSpinner"
         />
-
-    <View
-        android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@+id/fridge_spinner"
-        android:layout_marginTop="5dp"
-        android:background="@color/tirkiz"
-        />
-
 
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/bottom_navigation"
-        android:layout_below="@+id/divider"
+        android:layout_below="@+id/fridge_spinner"
         android:layout_marginTop="1dp"
         android:layout_marginBottom="0dp">
 

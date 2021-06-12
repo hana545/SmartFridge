@@ -30,6 +30,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -47,12 +48,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Fridge;
+import hr.riteh.sl.smartfridge.FirebaseDatabase.Grocery;
+import hr.riteh.sl.smartfridge.FirebaseDatabase.GrocerySH;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.Message;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.MyFridge;
 import hr.riteh.sl.smartfridge.FirebaseDatabase.User;
@@ -75,6 +80,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     private String ownerID;
     long countFridge = 0;
     long countMyFridge = 0;
+    String selected_unit = "";
 
     ArrayAdapter adapter;
 
@@ -238,8 +244,6 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-
-
     //create and show options menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -255,7 +259,10 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         switch (item.getItemId()) {
             case R.id.options_change_my_name:
                 changeUserName();
-                Toast.makeText(this, "Will show dialog to change name: "+Fuser.getEmail(), Toast.LENGTH_SHORT).show();
+                 return true;
+            case R.id.options_add_grocery_data:
+                IntentIntegrator intentIntegrator = new IntentIntegrator(this);
+                intentIntegrator.setBeepEnabled(true).setCaptureActivity(Capture.class).setPrompt("Place barcode inside the square").initiateScan();
                 return true;
             case R.id.options_see_all_fridges:
                 intent = new Intent(HomeActivity.this, SeeAllFridgesActivity.class);
@@ -293,12 +300,6 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-
-
-    public void onNothingSelected(AdapterView<?> arg0) {
-        // TODO Auto-generated method stub
-    }
-
     private void fillFragmentParameters(){
         if(!fridge_id_list.isEmpty()) {
             args.putString("fridgeID", fridge_id_list.get(selected_fridge));
@@ -306,11 +307,200 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
             args.putString("ownerID", ownerID);
         }
     }
+
     private void refreshFragment(){
         fillFragmentParameters();
         active.setArguments(args);
         ft = getSupportFragmentManager();
         ft.beginTransaction().detach(active).attach(active).commit();
+    }
+
+    public void onNothingSelected(AdapterView<?> arg0) {
+        // TODO Auto-generated method stub
+    }
+
+
+///options functions
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if(result != null) {
+            if(result.getContents() == null) {
+                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+            } else {
+                db.child("groceries").child(result.getContents()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            Toast.makeText(MyApplication.getAppContext(), "This barcode is already saved!", Toast.LENGTH_LONG).show();
+                        }
+                        else {
+                            addScanGroceryData(result.getContents());
+                        }
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(MyApplication.getAppContext(), "Something wrong happened with groceries", Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void addScanGroceryData(String scanned_groceryID){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final View customLayout = getLayoutInflater().inflate(R.layout.dialog_create_shopping_list_grocery, null);
+        builder.setView(customLayout);
+        TextView fridge_title = customLayout.findViewById(R.id.fridge_txt);
+        fridge_title.setText(" Add scan grocery data: ");
+        TextView info = customLayout.findViewById(R.id.info);
+        info.setText(" Please insert correct data for the product: ");
+        List<String> unit_list = new ArrayList<String>();
+        unit_list.add("kg");
+        unit_list.add("g");
+        unit_list.add("l");
+        unit_list.add("ml");
+        unit_list.add("pieces");
+
+        Spinner unitSpinner = (Spinner) customLayout.findViewById(R.id.unit_spinner);
+        unitSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view,
+                                       int position, long id) {
+                Object item = adapterView.getItemAtPosition(position);
+                if (item != null) {
+                    selected_unit = item.toString();
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                // TODO Auto-generated method stub
+
+            }
+        });
+        ArrayAdapter unitAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, unit_list);
+        // Specify the layout to use when the list of choices appears
+        unitAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        unitSpinner.setAdapter(unitAdapter);
+
+        EditText edt_grocery_name = (EditText) customLayout.findViewById(R.id.dialog_grocery_name);
+        NumberPicker numpicker = (NumberPicker) customLayout.findViewById(R.id.dialog_grocery_quantity_numpicker);
+        numpicker.setMaxValue(1000);
+        numpicker.setMinValue(1);
+        // add create and cancel buttons
+        builder.setPositiveButton(R.string.dialog_create, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                numpicker.clearFocus();
+                String grocery_name = edt_grocery_name.getText().toString();
+                Integer quantity =  numpicker.getValue();
+                String ownerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                GrocerySH msg = new GrocerySH(ownerID, grocery_name, quantity, selected_unit);
+                if (!grocery_name.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    FirebaseDatabase.getInstance().getReference().child("groceries").child(scanned_groceryID).setValue(msg).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(MyApplication.getAppContext(), "Grocery data saved!", Toast.LENGTH_LONG).show();
+
+                            } else {
+                                Toast.makeText(MyApplication.getAppContext(), "Failed to save grocery data! Try again.", Toast.LENGTH_LONG).show();
+
+                            }
+                        }
+                    });
+                } else {
+                    Toast.makeText(MyApplication.getAppContext(), "You must enter text", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        builder.setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        // create and show the alert dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+    }
+
+    private void changeUserName(){
+
+        Dialog dialog = new Dialog(this);
+        dialog.setCancelable(true);
+
+        View view  = getLayoutInflater().inflate(R.layout.dialog_change_user_name, null);
+        dialog.setContentView(view);
+
+        EditText newName = (EditText) view.findViewById(R.id.dialog_change_name);
+        newName.setText(Fuser.getDisplayName());
+        TextView account = (TextView) view.findViewById(R.id.dialog_change_name_account);
+        account.setText(Fuser.getEmail());
+        Button btn_saveName = (Button) view.findViewById(R.id.dialog_change_name_save);
+
+        btn_saveName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!newName.getText().toString().isEmpty() && newName.getText().toString().length() < 20) {
+                    HashMap<String, Object> changeName = new HashMap<>();
+
+                    changeName.put("name", newName.getText().toString());
+                    fridgeID = new String();
+                    db.child("messages").orderByChild("authorID").equalTo(userID).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot snapshot) {
+                            if (snapshot.exists() && snapshot != null) {
+                                for (DataSnapshot message : snapshot.getChildren()) {
+                                    message.getRef().child("author").setValue(newName.getText().toString());
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.w("TAG: ", databaseError.getMessage());
+                        }
+                    });
+                    db.child("myFridges").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot snapshot) {
+                            if (snapshot.exists() && snapshot != null) {
+                                for (DataSnapshot fridge : snapshot.getChildren()) {
+                                    fridgeID = fridge.getKey();
+                                    db.child("fridgeMembers").child(fridgeID).child(userID).updateChildren(changeName);
+                                }
+
+                                db.child("users").child(userID).updateChildren(changeName);
+                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                        .setDisplayName(newName.getText().toString()).build();
+                                Fuser.updateProfile(profileUpdates);
+                                Toast.makeText(HomeActivity.this, "Your name is updated to " + newName.getText().toString(), Toast.LENGTH_LONG).show();
+                                dialog.dismiss();
+
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.w("TAG: ", databaseError.getMessage());
+                        }
+                    });
+                } else {
+                    Toast.makeText(HomeActivity.this, "Error: Invalid name", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        dialog.show();
+
     }
 
     private void createNewFridge() {
@@ -395,7 +585,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-    public void changePrimaryValue(String key) {
+    private void changePrimaryValue(String key) {
 
         fridges_query = db.child("myFridges").child(userID);
 
@@ -426,6 +616,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
     }
+
     private void logout() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -450,75 +641,9 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
         dialog.show();
     }
 
- public void changeUserName(){
 
-     Dialog dialog = new Dialog(this);
-     dialog.setCancelable(true);
 
-     View view  = getLayoutInflater().inflate(R.layout.dialog_change_user_name, null);
-     dialog.setContentView(view);
 
-     EditText newName = (EditText) view.findViewById(R.id.dialog_change_name);
-     newName.setText(Fuser.getDisplayName());
-     TextView account = (TextView) view.findViewById(R.id.dialog_change_name_account);
-     account.setText(Fuser.getEmail());
-     Button btn_saveName = (Button) view.findViewById(R.id.dialog_change_name_save);
 
-     btn_saveName.setOnClickListener(new View.OnClickListener() {
-         @Override
-         public void onClick(View v) {
-             if(!newName.getText().toString().isEmpty() && newName.getText().toString().length() < 20) {
-                 HashMap<String, Object> changeName = new HashMap<>();
-
-                 changeName.put("name", newName.getText().toString());
-                 fridgeID = new String();
-                 db.child("messages").orderByChild("authorID").equalTo(userID).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot snapshot) {
-                        if (snapshot.exists() && snapshot != null) {
-                            for (DataSnapshot message : snapshot.getChildren()) {
-                                message.getRef().child("author").setValue(newName.getText().toString());
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.w("TAG: ", databaseError.getMessage());
-                    }
-                });
-                 db.child("myFridges").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
-                     @Override
-                     public void onDataChange(DataSnapshot snapshot) {
-                         if (snapshot.exists() && snapshot != null) {
-                             for (DataSnapshot fridge : snapshot.getChildren()) {
-                                 fridgeID = fridge.getKey();
-                                 db.child("fridgeMembers").child(fridgeID).child(userID).updateChildren(changeName);
-                             }
-
-                             db.child("users").child(userID).updateChildren(changeName);
-                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                     .setDisplayName(newName.getText().toString()).build();
-                             Fuser.updateProfile(profileUpdates);
-                             Toast.makeText(HomeActivity.this, "Your name is updated to " + newName.getText().toString(), Toast.LENGTH_LONG).show();
-                             dialog.dismiss();
-
-                         }
-                     }
-
-                     @Override
-                     public void onCancelled(DatabaseError databaseError) {
-                         Log.w("TAG: ", databaseError.getMessage());
-                     }
-                 });
-             } else {
-                 Toast.makeText(HomeActivity.this, "Error: Invalid name", Toast.LENGTH_LONG).show();
-             }
-         }
-     });
-
-     dialog.show();
-
- }
 
 }

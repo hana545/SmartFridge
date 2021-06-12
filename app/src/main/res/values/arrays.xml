@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="show_grocery" >
+        <item>Show all</item>
+        <item>show expiring</item>
+        <item>show not expiring</item>
+    </string-array>
+</resources>

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:mstb="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/gradient_white_blue"
-    >
+    tools:context=".GroceryFragment">
+
     <ImageButton
         android:id="@+id/imageButton_shopping_list"
         android:layout_width="match_parent"
@@ -15,8 +16,18 @@
         android:backgroundTint="@color/dark_tirkiz"
         android:tint="@color/white"
         tools:ignore="VectorDrawableCompat"
-        android:layout_alignParentTop="true"/>
+        android:layout_alignParentTop="true"
+       />
 
+    <org.honorato.multistatetogglebutton.MultiStateToggleButton
+        android:id="@+id/mstb_multi_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_below="@+id/imageButton_shopping_list"
+        mstb:mstbPrimaryColor="@color/dark_tirkiz"
+        app:mstbSecondaryColor="@color/white"
+        mstb:values="@array/show_grocery" />
 
     <TextView
         android:id="@+id/text_no_groceries"
@@ -34,7 +45,7 @@
         android:id="@+id/recycler_view_grocery"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/imageButton_shopping_list"
+        android:layout_below="@+id/mstb_multi_id"
         >
 
     </androidx.recyclerview.widget.RecyclerView>
@@ -49,5 +60,18 @@
         android:layout_alignParentRight="true"
         android:layout_marginRight="40dp"
         app:srcCompat="@android:drawable/ic_input_add" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/grocery_btn_scanNewGrocery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:layout_above="@+id/grocery_btn_newGrocery"
+        android:layout_marginBottom="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="40dp"
+        app:srcCompat="@drawable/ic_outline_qr_code_scanner_24"
+        tools:ignore="VectorDrawableCompat" />
+
 
 </RelativeLayout>

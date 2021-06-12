@@ -16,11 +16,23 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="10dp"
         android:layout_marginRight="4dp"
         android:layout_marginLeft="4dp"
+        android:textStyle="bold|italic"
         android:padding="4dp"
         android:id="@+id/fridge_txt">
+    </TextView>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginLeft="5dp"
+        android:paddingTop="10dp"
+        android:layout_below="@id/fridge_txt"
+        android:id="@+id/info">
     </TextView>
 
     <EditText
@@ -30,14 +42,14 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:hint="Grocery name"
         android:ems="10"
         android:maxLength="30"
         android:gravity="start|top"
         android:inputType="textMultiLine"
         android:textColor="@color/black"
-        android:layout_below="@id/fridge_txt"/>
+        android:layout_below="@id/info"/>
 
     <TextView
         android:id="@+id/dialog_grocery_quantity"

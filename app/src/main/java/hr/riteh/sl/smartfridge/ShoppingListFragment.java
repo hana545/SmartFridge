@@ -111,7 +111,6 @@ public class ShoppingListFragment extends Fragment implements ShoppingListAdapte
         add.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                // ((MessagesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container)).getFridgeMessages(fridge_id_list.get(selected_fridge));
                 createNewGrocerySH();
             }
         });
@@ -133,7 +132,7 @@ public class ShoppingListFragment extends Fragment implements ShoppingListAdapte
                     // dataSnapshot is the "grocery" node with all children with id userID
                     for (DataSnapshot groceries : snapshot.getChildren()) {
                         Grocery groceryData = groceries.getValue(Grocery.class);
-                        grocery_list_name.add(groceryData.grocery_name);
+                        grocery_list_name.add(groceryData.name);
                         grocery_list_quantity.add(String.valueOf(groceryData.quantity));
                         grocery_list_unit.add(groceryData.unit);
                         grocery_id_list.add(groceries.getKey());
@@ -164,7 +163,9 @@ public class ShoppingListFragment extends Fragment implements ShoppingListAdapte
         final View customLayout = getLayoutInflater().inflate(R.layout.dialog_create_shopping_list_grocery, null);
         builder.setView(customLayout);
         TextView fridge_title = customLayout.findViewById(R.id.fridge_txt);
-        fridge_title.setText(" Add to shopping list for fridge: " + fridge_name);
+        fridge_title.setText(" Add to shopping list ");
+        TextView info = customLayout.findViewById(R.id.info);
+        info.setText(" Fridge: " + fridge_name);
 
         Spinner unitSpinner = (Spinner) customLayout.findViewById(R.id.unit_spinner);
         unitSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
