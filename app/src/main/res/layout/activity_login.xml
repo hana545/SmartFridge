@@ -75,6 +75,19 @@
         app:layout_constraintTop_toBottomOf="@+id/login_password"
         app:layout_constraintHorizontal_bias="0.5"/>
 
+    <com.shobhitpuri.custombuttons.GoogleSignInButton
+        android:id="@+id/btn_google_signin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="@string/google_sign_up"
+        android:layout_marginTop="18dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_login"
+        app:layout_constraintHorizontal_bias="0.5"/>
+
+
     <ProgressBar
         android:id="@+id/login_progress_bar"
         style="?android:attr/progressBarStyle"
@@ -85,18 +98,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_login" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_google_signin" />
 
     <TextView
         android:id="@+id/acc_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="47dp"
+        android:layout_marginTop="0dp"
         android:text="@string/txt_dont_have_acc"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_login" />
+        app:layout_constraintTop_toBottomOf="@+id/login_progress_bar" />
 
     <TextView
         android:id="@+id/btn_register"

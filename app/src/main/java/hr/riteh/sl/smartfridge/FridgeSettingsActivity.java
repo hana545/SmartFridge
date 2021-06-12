@@ -442,7 +442,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
                 Fridge newFridge = new Fridge(FName, userID);
                 MyFridge newMyFridge = new MyFridge(FName, userID, primary);
                 User newUser = new User(Fuser.getDisplayName(), Fuser.getEmail());
-                if (!FName.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null && FName.length() < 25) {
+                if (!FName.matches("") && FirebaseAuth.getInstance().getCurrentUser() != null && FName.length() <= 25) {
                     db.child("myFridges").child(userID).orderByChild("name").equalTo(FName).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -522,7 +522,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
                 MyFridge currentFridge = new MyFridge(fridge_name, userID, false);
 
                 if (!newEmail.equals("") && newEmail.contains("@") && !newEmail.equals(userEmail)) {
-                    db.child("users").addValueEventListener(new ValueEventListener() {
+                    db.child("users").orderByChild("email").equalTo(newEmail).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists()) {
@@ -530,8 +530,7 @@ public class FridgeSettingsActivity extends AppCompatActivity implements Adapter
                                 User newMember = new User();
                                 for (DataSnapshot users : snapshot.getChildren()) {
                                     User userData = users.getValue(User.class);
-                                    if (userData != null) {
-                                        String email = userData.email;
+                                    if (userData.email != null) {
                                         if (userData.email.equals(newEmail)) {
                                             exists = true;
                                             memberID = users.getKey();
