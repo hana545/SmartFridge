@@ -4,16 +4,21 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -23,6 +28,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.Date;
 import java.util.Map;
 
+import hr.riteh.sl.smartfridge.HomeActivity;
 import hr.riteh.sl.smartfridge.MyApplication;
 import hr.riteh.sl.smartfridge.R;
 import hr.riteh.sl.smartfridge.SendNotification.APIService;
@@ -43,8 +49,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         super.onMessageReceived(remoteMessage);
         title=remoteMessage.getData().get("Title");
         message=remoteMessage.getData().get("Message");
-        NotificationManager notificationManager = (NotificationManager) getSystemService((Context.NOTIFICATION_SERVICE));
+        NotificationManagerCompat notificationManager =  NotificationManagerCompat.from(this);
         String NOTIFICATION_CHANNEL_ID = "SmartFridge";
+        // Create an Intent for the activity you want to start
+        Intent resultIntent = new Intent(this, HomeActivity.class);
+        // Create the TaskStackBuilder and add the intent, which inflates the back stack
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addNextIntentWithParentStack(resultIntent);
+        // Get the PendingIntent containing the entire back stack
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             @SuppressLint("WrongConstant") NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "My Notification", NotificationManager.IMPORTANCE_MAX);
 
@@ -66,7 +80,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setTicker("Hearty365")
                 .setContentTitle(title)
                 .setContentText(message)
-                .setContentInfo("info");
+                .setContentInfo("info")
+                .setContentIntent(resultPendingIntent);
+
 
         int m = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
         notificationManager.notify(m, notificationBuilder.build());

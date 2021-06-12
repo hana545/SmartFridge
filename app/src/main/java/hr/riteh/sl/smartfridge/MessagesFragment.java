@@ -185,7 +185,7 @@ public class MessagesFragment extends Fragment implements MessageAdapter.OnMessa
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 getFridgeMessages(fridgeID);
-                                Notifications.sendNotificationToMembers_newMessage(fridgeID, "New message on the fridge", author_name+" post a new message");
+                                Notifications.sendNotificationToMembers_newMessage(fridgeID, "New message on the fridge", author_name+" post a new message on "+fridge_name +" fridge");
                                 Toast.makeText(getActivity(), "Message posted!", Toast.LENGTH_LONG).show();
 
                             } else {
