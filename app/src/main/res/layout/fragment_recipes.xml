@@ -11,13 +11,23 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Recipes"
+        android:text="You Have Less Than 5 Groceries"
         android:textStyle="bold"
         android:textAlignment="center"
         android:gravity="center"
-        android:textSize="50sp"
+        android:textSize="45sp"
         android:layout_centerInParent="true"
+        android:id="@+id/text_no_recipes"
+        android:visibility="invisible"
         />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_recipe"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+    </androidx.recyclerview.widget.RecyclerView>
 
 
 </RelativeLayout>
