@@ -161,6 +161,7 @@ public class RecipesFragment extends Fragment implements RecipeAdapter.OnRecipeL
     private void setRecipes(){
         if(grocery_list_name.size() < 5) {
             view.findViewById(R.id.text_no_recipes).setVisibility(View.VISIBLE);
+            mProgressDialog.dismiss();
         } else {
             view.findViewById(R.id.text_no_recipes).setVisibility(View.INVISIBLE);
             ArrayList<Integer> indexes = new ArrayList<Integer>();
