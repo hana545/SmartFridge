@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -70,6 +71,9 @@ public class RecipesFragment extends Fragment implements RecipeAdapter.OnRecipeL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Spinner fridge_spinner = (Spinner) getActivity().findViewById(R.id.fridge_spinner);
+        fridge_spinner.setEnabled(true);
+        fridge_spinner.setVisibility(View.VISIBLE);
 
     }
 

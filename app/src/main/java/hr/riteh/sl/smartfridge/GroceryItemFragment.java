@@ -200,7 +200,7 @@ public class GroceryItemFragment extends Fragment {
                 for (DataSnapshot snap : snapshot.getChildren()) {
                     groceryValues.put(snap.getKey(), snap.getValue());
                 }
-                groceryValues.put("grocery_name", editName.getText().toString());
+                groceryValues.put("name", editName.getText().toString());
                 groceryValues.put("quantity", numpicker.getValue());
                 groceryValues.put("unit", selected_unit);
                 groceryValues.put("exp_date",  getDateFromDatePicker(datepicker));
